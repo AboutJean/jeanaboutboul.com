@@ -1,0 +1,189 @@
+---
+import type { BookNote } from "../../data/literatureNote";
+
+interface Props {
+  books: BookNote[];
+}
+
+const { books } = Astro.props;
+const firstBookId = books[0]?.id;
+---
+
+<div class="book-tabs not-prose" data-book-tabs>
+  <div class="book-tab-list" role="tablist" aria-label="Fiches de livres">
+    {books.map((book, index) => {
+      const isActive = book.id === firstBookId;
+
+      return (
+        <button
+          id={`tab-${book.id}`}
+          type="button"
+          role="tab"
+          aria-controls={`panel-${book.id}`}
+          aria-selected={isActive ? "true" : "false"}
+          tabindex={isActive ? "0" : "-1"}
+          class:list={["book-tab-button", isActive && "is-active"]}
+          data-tab={book.id}
+        >
+          <span class="book-tab-rank">{String(index + 1).padStart(2, "0")}</span>
+          <span>{book.tabLabel}</span>
+        </button>
+      );
+    })}
+  </div>
+
+  <div class="mt-6">
+    {books.map((book) => {
+      const isActive = book.id === firstBookId;
+
+      return (
+        <section
+          id={`panel-${book.id}`}
+          role="tabpanel"
+          aria-labelledby={`tab-${book.id}`}
+          hidden={!isActive}
+          class="book-panel"
+          data-panel={book.id}
+        >
+          <div class="book-panel-grid">
+            <figure class="book-cover-frame">
+              <img src={book.cover} alt={`Couverture de ${book.title}`} class="book-cover-image" />
+            </figure>
+
+            <div class="book-panel-copy">
+              <p class="kicker">Fiche de lecture</p>
+              <div class="mt-3 flex flex-wrap items-end gap-3">
+                <h3 class="text-3xl font-bold tracking-tight text-ink sm:text-4xl">{book.title}</h3>
+                <span class="font-sans text-[0.72rem] uppercase tracking-[0.18em] text-accent">
+                  {book.author} · {book.year}
+                </span>
+              </div>
+
+              <p class="mt-4 text-base leading-relaxed text-ink-soft">{book.meta}</p>
+
+              <div class="mt-5 flex flex-wrap gap-2">
+                {book.presence.map((item) => (
+                  <span class="book-presence-chip">{item}</span>
+                ))}
+              </div>
+
+              <p class="mt-6 text-[1.02rem] leading-relaxed text-ink-soft">{book.summary}</p>
+
+              <div class="book-score-grid">
+                <div class="book-score-card">
+                  <span class="book-score-label">Note moyenne</span>
+                  <strong class="book-score-value">{book.stats.note}</strong>
+                </div>
+                <div class="book-score-card">
+                  <span class="book-score-label">Mentions IA</span>
+                  <strong class="book-score-value">{book.stats.mentions}</strong>
+                </div>
+                <div class="book-score-card">
+                  <span class="book-score-label">Présence TOP 10</span>
+                  <strong class="book-score-value">{book.stats.platforms}</strong>
+                </div>
+                <div class="book-score-card">
+                  <span class="book-score-label">Score composite</span>
+                  <strong class="book-score-value">{book.stats.score}</strong>
+                </div>
+              </div>
+
+              <div class="mt-8">
+                <p class="font-sans text-[0.68rem] uppercase tracking-[0.18em] text-ink-faint">
+                  Catégories IA retenues
+                </p>
+                {
+                  book.categories.length > 0 ? (
+                    <div class="mt-3 flex flex-wrap gap-2">
+                      {book.categories.map((category) => (
+                        <span class="book-category-chip">
+                          <strong>{category.label}</strong>
+                          <span>{category.ai}</span>
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    <p class="mt-3 text-sm leading-relaxed text-ink-soft">
+                      Aucune catégorie IA marquante dans cette étude.
+                    </p>
+                  )
+                }
+              </div>
+
+              <div class="mt-8 overflow-x-auto">
+                <table class="book-source-table">
+                  <thead>
+                    <tr>
+                      <th>Source</th>
+                      <th>Valeur</th>
+                      <th>Lecture</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {book.sourceRows.map((row) => (
+                      <tr>
+                        <td>{row.label}</td>
+                        <td>{row.value}</td>
+                        <td>{row.note}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+      );
+    })}
+  </div>
+</div>
+
+<script>
+  const roots = document.querySelectorAll("[data-book-tabs]");
+
+  roots.forEach((root) => {
+    const tabs = Array.from(root.querySelectorAll("[role='tab']"));
+    const panels = Array.from(root.querySelectorAll("[role='tabpanel']"));
+
+    const activateTab = (targetId) => {
+      tabs.forEach((tab) => {
+        const isActive = tab.dataset.tab === targetId;
+        tab.setAttribute("aria-selected", isActive ? "true" : "false");
+        tab.setAttribute("tabindex", isActive ? "0" : "-1");
+        tab.classList.toggle("is-active", isActive);
+      });
+
+      panels.forEach((panel) => {
+        panel.hidden = panel.dataset.panel !== targetId;
+      });
+    };
+
+    tabs.forEach((tab, index) => {
+      tab.addEventListener("click", () => activateTab(tab.dataset.tab));
+
+      tab.addEventListener("keydown", (event) => {
+        if (event.key !== "ArrowRight" && event.key !== "ArrowLeft") {
+          return;
+        }
+
+        event.preventDefault();
+        const nextIndex =
+          event.key === "ArrowRight"
+            ? (index + 1) % tabs.length
+            : (index - 1 + tabs.length) % tabs.length;
+        const nextTab = tabs[nextIndex];
+        nextTab.focus();
+        activateTab(nextTab.dataset.tab);
+      });
+    });
+
+    const hash = window.location.hash.replace("#", "");
+
+    if (hash) {
+      const matchingTab = tabs.find((tab) => tab.dataset.tab === hash);
+      if (matchingTab) {
+        activateTab(hash);
+      }
+    }
+  });
+</script>

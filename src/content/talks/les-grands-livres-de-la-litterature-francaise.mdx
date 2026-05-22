@@ -1,0 +1,287 @@
+---
+title: "Les grands livres de la littérature française"
+summary: "Étude croisée multi-sources du canon littéraire francophone à partir de quatre plateformes publiques et de trois IA génératives."
+date: 2026-05-22
+category: "Talks"
+tags: ["literature", "books", "ranking", "french-literature", "talks"]
+---
+
+import BookTabs from "../../components/notes/BookTabs.astro";
+import LiteratureCorpusTable from "../../components/notes/LiteratureCorpusTable.astro";
+import { literatureBooks } from "../../data/literatureNote";
+
+## 1. Méthodologie
+
+L'enjeu de cette étude est de produire un classement raisonné des grandes œuvres de la littérature francophone, en réduisant le biais de toute source unique par une triangulation systématique entre :
+
+- les **plateformes publiques de notation** — qui captent le goût des lecteurs ordinaires (Goodreads, Babelio) et celui de la cinéphilie/critique amateure (SensCritique), ainsi qu'un consensus communautaire raisonné (Reddit) ;
+- les **modèles de langage** — qui condensent une lecture critique académique, mais avec leurs biais propres (récence, anglophonie, mode).
+
+### 1.1 Sélection du corpus
+Cent un (101) titres ont été retenus, après agrégation des œuvres récurrentes dans :
+
+- les TOP 100 des trois plateformes de notation (SensCritique, Babelio, Goodreads) ;
+- les listes IA produites sur les huit catégories analytiques (cf. § 2.2) ;
+- un complément manuel pour les œuvres incontournables non spontanément remontées par les sources (notamment certains classiques du XVIIᵉ siècle).
+
+Le corpus est dominé par la littérature francophone (n = 86), avec une représentation contrôlée de la littérature étrangère traduite (n = 15) à des fins de comparaison.
+
+### 1.2 Agrégation des notes publiques
+Pour chaque œuvre, on dispose de trois notes brutes :
+
+- $N_{GR}$ : note Goodreads, sur 5 ;
+- $N_{Bab}$ : note Babelio, sur 5 ;
+- $N_{SC}$ : note SensCritique, sur 10.
+
+On définit une **note normalisée moyenne** sur 10 :
+
+$$\overline{N} = \dfrac{2\,N_{GR} + 2\,N_{Bab} + N_{SC}}{3}$$
+
+Les notes Goodreads et Babelio sont doublées pour les ramener à l'échelle décimale ; le coefficient $\tfrac{1}{3}$ assure la borne supérieure $\overline{N} \le 10$.
+
+### 1.3 Croisement IA × catégories
+Trois IA (Claude, ChatGPT, Gemini) ont été interrogées pour produire, sur chacune des huit catégories ci-dessous, une liste de dix œuvres jugées emblématiques :
+
+1. **Général** — œuvres considérées comme indispensables, tous genres confondus ;
+2. **Mécanique narrative** — œuvres remarquables par la construction du récit ;
+3. **Perfection stylistique** — sommets de l'écriture, prose ou vers ;
+4. **Profondeur psychologique** — œuvres explorant les arcanes des personnages ;
+5. **Transparence philosophique** — œuvres porteuses d'une pensée explicite ;
+6. **Courts** — œuvres marquantes de moins de 250 pages ;
+7. **Contemporain** — œuvres marquantes du XXᵉ et XXIᵉ siècle ;
+8. **Étrangers** — grandes œuvres non francophones (référentiel comparatif).
+
+Pour chaque livre, on compte le nombre total de mentions IA (max théorique : 8 catégories × 3 IA = **24**).
+
+### 1.4 Indicateur composite
+Trois signaux indépendants alimentent un score final :
+
+$$\boxed{\;S = 0{,}45 \cdot \dfrac{\overline{N}}{10} + 0{,}25 \cdot \dfrac{n_{T10}}{4} + 0{,}30 \cdot \dfrac{m_{IA}}{24}\;}$$
+
+avec
+- $\overline{N}$ : note publique normalisée définie au § 1.2 ;
+- $n_{T10} \in \{0,1,2,3,4\}$ : nombre de plateformes (parmi SC, Babelio, Goodreads, Reddit) où l'œuvre figure dans le TOP 10 ;
+- $m_{IA} \in \{0,\ldots,24\}$ : nombre total de mentions par les trois IA toutes catégories confondues.
+
+Les pondérations privilégient le consensus public ($0{,}45$), tempèrent par la consécration TOP 10 ($0{,}25$), et valorisent la convergence critique IA ($0{,}30$). On a $S \in [0,1]$.
+
+Pour la liste « pour commencer », on utilise un score d'accessibilité distinct, plus axé sur le goût grand public :
+
+$$S_{acc} = 0{,}55 \cdot \dfrac{2N_{GR}+2N_{Bab}}{20} + 0{,}30 \cdot \dfrac{n_{T10}}{4} + 0{,}15 \cdot \dfrac{\overline{N}}{10}$$
+
+appliqué à une liste blanche de titres connus pour leur abordabilité narrative.
+
+---
+
+## 2. Sources
+
+### 2.1 Plateformes publiques
+
+| Plateforme | Nature | Biais principal |
+|---|---|---|
+| **SensCritique** | Communauté francophone d'amateurs cinéma/littérature, échelle /10 fine | Sur-représentation de la SF, du roman noir, du genre |
+| **Babelio** | Communauté francophone grand public, échelle /5 | Plébiscite le best-seller émotionnel récent (Perrin, Lemaitre, Gary) |
+| **Goodreads** | Communauté anglophone grand public, échelle /5 | Sur-représente les classiques mondiaux traduits ; moins fin sur l'inédit français |
+| **Reddit** (r/Livres et apparentés) | Discussion communautaire raisonnée | Plébiscite le canon « sérieux » (Proust, Céline, Sartre, Zola) |
+
+### 2.2 Modèles d'intelligence artificielle
+
+| IA | Lettre | Profil |
+|---|---|---|
+| **Claude** (Anthropic) | **C** | Forte présence académique francophone, sens du canon classique |
+| **ChatGPT** (OpenAI) | **T** | Large culture mondiale, biais légèrement anglophone et XIXᵉ siècle |
+| **Gemini** (Google) | **G** | Approche contemporaine et catalogue, plus récent et plus genre |
+
+Chaque IA a été interrogée selon un protocole identique : *« Donne-moi les 10 œuvres les plus marquantes de la littérature francophone dans la catégorie X »*, pour X parcourant les huit catégories analytiques.
+
+---
+
+## 3. Conventions et légende
+
+### 3.1 Tableau récapitulatif (§ 4)
+
+Le tableau récapitulatif présente, pour chaque œuvre, **les mentions IA par catégorie analytique**. Dans une cellule de catégorie, les lettres indiquent quelles IA ont retenu l'œuvre dans cette catégorie :
+
+- **C** = Claude
+- **T** = ChatGPT
+- **G** = Gemini
+- **—** = aucune IA
+
+La colonne **Score T.** indique la somme des mentions IA (toutes catégories, toutes IA), équivalente à $m_{IA}$ du § 1.4.
+
+### 3.2 Notes publiques
+
+Les notes brutes sont reportées telles qu'observées. Une étoile **★** accolée à la note indique que l'œuvre figure dans le TOP 10 de la plateforme correspondante :
+
+> *Exemple :* « 8,2 ★ » signifie : note 8,2/10 sur SensCritique **et** présence dans le TOP 10 de SensCritique.
+
+Pour la colonne **Reddit**, qui ne fournit pas de note chiffrée, seule la présence dans la liste communautaire est marquée par **★**.
+
+### 3.3 Catégories d'analyse IA
+
+| Code | Catégorie | Critère |
+|---|---|---|
+| **Général** | Œuvre indispensable, tous genres | Importance globale dans le canon |
+| **Méca. Nar.** | Mécanique narrative | Qualité de la construction du récit |
+| **Style** | Perfection stylistique | Travail formel de la langue |
+| **Psycho.** | Profondeur psychologique | Densité des personnages |
+| **Philo.** | Transparence philosophique | Pensée explicite portée par l'œuvre |
+| **Courts** | Format court | < 250 pages environ |
+| **Contemp.** | Contemporain | XXᵉ - XXIᵉ siècle |
+| **Étranger** | Non francophone | Référentiel comparatif |
+
+
+## 4. Tableau récapitulatif consolidé
+
+Cent un (101) œuvres triées par score composite $S$ décroissant. Les **10 premières** œuvres francophones constituent le **TOP 10 général** (§ 7.1). Le caractère ★ accolé à une note indique la présence dans le TOP 10 de la plateforme.
+
+<LiteratureCorpusTable />
+
+> Note : les œuvres en gras dans la colonne Titre sont celles du TOP 10 général francophone (cf. § 7.1).
+
+## 5. Analyse croisée
+
+### 5.1 Décomposition des scores du TOP 10 général
+
+Le graphique ci-dessous décompose, pour chacune des dix œuvres du TOP 10 général, la contribution des trois termes du score composite $S$. La lecture est riche : **L'Étranger** doit son rang n°1 à un cumul presque parfait des trois sources (notes, présence plateformes, IA) ; **Le Comte de Monte-Cristo** s'appuie presque exclusivement sur les deux premiers termes (consensus public + TOP 10) et n'est presque pas mentionné par les IA ; à l'inverse **Madame Bovary** doit sa présence aux IA, qui le citent massivement, alors que ses notes publiques sont les plus basses du top.
+
+![Décomposition du score composite — TOP 10 général](/notes/literature/charts/01_top10_composite.png)
+
+### 5.2 Distribution des notes moyennes
+
+La distribution des notes moyennes $\overline{N}$ est centrée autour de **7,83/10**, avec la quasi-totalité des œuvres comprises entre 7,0 et 8,8. Aucune œuvre du corpus n'est sous-notée massivement : la sélection initiale (titres remontés par les sources) introduit un biais de qualité incontournable. Les œuvres étrangères affichent une distribution comparable, mais légèrement décalée vers le haut, ce qui est cohérent : les œuvres étrangères qui « passent la frontière » sont celles déjà filtrées par le canon mondial.
+
+![Distribution des notes moyennes](/notes/literature/charts/02_distribution_notes.png)
+
+### 5.3 Croisement reconnaissance IA × consensus public
+
+Le nuage de points ci-dessous croise la note publique moyenne $\overline{N}$ (axe horizontal) et les mentions IA totales $m_{IA}$ (axe vertical), avec la taille du point proportionnelle au nombre de plateformes (sur 4) où l'œuvre figure dans le TOP 10.
+
+![Reconnaissance IA × consensus public](/notes/literature/charts/03_scatter_ai_notes.png)
+
+On distingue trois profils :
+
+- **Triple consensus** (haut-droite, gros points) : *L'Étranger*, *À la recherche du temps perdu*, *Les Misérables* — œuvres validées simultanément par les lecteurs, le canon TOP 10 et la critique IA.
+
+- **Consensus IA sans consensus public** (haut, à gauche) : *Madame Bovary* — citée 14 fois par les IA, mais notée seulement 7,43/10, signe d'un classique « scolaire » plus admiré qu'aimé.
+
+- **Best-sellers sans IA** (bas-droite, gros points) : *Le Comte de Monte-Cristo*, *Cyrano de Bergerac*, *Le Petit Prince*, *La Promesse de l'aube* — œuvres très notées et très lues, mais qui passent sous le radar des IA, lesquelles privilégient le canon technique.
+
+### 5.4 Mentions IA par catégorie — TOP 10 général
+
+La heatmap ci-dessous précise quelles catégories chaque œuvre du TOP 10 général occupe, et avec quelle intensité (nombre d'IA sur 3) :
+
+![Mentions IA par catégorie — TOP 10 général](/notes/literature/charts/04_heatmap_top10_categories.png)
+
+Lectures notables :
+
+- **Madame Bovary** et **À la recherche du temps perdu** sont les deux seuls livres pleinement consensuels (3/3) sur quatre catégories techniques : *Général*, *Mécanique narrative*, *Style*, *Psychologie*. Ce sont les œuvres-mètres-étalon.
+
+- **L'Étranger** occupe toutes les catégories (la plus large couverture du corpus), avec un sommet à 3/3 en *Psychologie* et *Courts* — combinaison unique.
+
+- **Le Comte de Monte-Cristo**, **Cyrano de Bergerac** et **La Promesse de l'aube** : zéro mention IA — ce sont les *anti-IA* du top, portés exclusivement par le public.
+
+### 5.5 Répartition temporelle du corpus francophone
+
+![Répartition temporelle](/notes/literature/charts/05_repartition_temporelle.png)
+
+Le XIXᵉ siècle domine le corpus avec **26 œuvres**, suivi par la première moitié du XXᵉ (18 œuvres). Le XVIᵉ et le XVIIᵉ siècles sont sous-représentés, ce qui reflète la prédominance des plateformes publiques (les lecteurs ordinaires lisent peu Rabelais ou La Fontaine). La note moyenne reste remarquablement stable entre 7,5 et 8 quel que soit le siècle, signe que le corpus est filtré en amont.
+
+### 5.6 Convergence des plateformes : qui est vraiment dans les quatre TOP 10 ?
+
+Le tableau ci-dessous recense les œuvres présentes dans le TOP 10 d'au moins trois plateformes sur quatre :
+
+| Rang | Œuvre | SC | Babelio | Goodreads | Reddit |
+|---|---|:---:|:---:|:---:|:---:|
+| **4/4** | L'Étranger | ★ | ★ | ★ | ★ |
+| **4/4** | Le Comte de Monte-Cristo | ★ | ★ | ★ | ★ |
+| **4/4** | Les Misérables | ★ | ★ | ★ | ★ |
+| 3/4 | Le Petit Prince | ★ | ★ | ★ | — |
+
+**Seules trois œuvres** apparaissent dans les quatre TOP 10 simultanément : *L'Étranger*, *Le Comte de Monte-Cristo*, *Les Misérables*. **Le Petit Prince** est l'unique œuvre présente dans 3/4 des TOP 10 — il est absent du seul TOP 10 Reddit, traditionnellement plus orienté vers le canon « sérieux ».
+
+### 5.7 Patterns observés
+
+1. **Le poids du XIXᵉ** : sur les 10 œuvres du TOP 10 général, six datent ou sont produites pendant le XIXᵉ (Hugo, Dumas, Flaubert) ou sa traîne directe (Proust 1913-1927). Le canon littéraire francophone reste massivement adossé à ce siècle.
+
+2. **Le filtre Reddit** : Reddit retient *Voyage au bout de la nuit*, *Germinal*, *Candide*, *La Nausée*, *Bonjour tristesse* — œuvres absentes du TOP 10 grand public ailleurs. Cette plateforme capte une forme de canon académique communautaire moins lisse.
+
+3. **L'angle mort des IA sur le succès populaire** : Dumas (Monte-Cristo et les Mousquetaires), Rostand (Cyrano), Gary (Promesse), Lemaitre (Au revoir là-haut) n'apparaissent quasiment jamais dans les listes IA, alors qu'ils dominent le grand public. Les IA semblent surestimer le canon académique strict et sous-estimer la littérature populaire de qualité.
+
+4. **Le cas Proust** : c'est l'œuvre la plus citée par les IA (15 mentions), mais elle n'est présente que dans 2 TOP 10 publics (SC et Reddit) — Proust est davantage *admiré* que *lu*.
+
+5. **Le cas Cyrano** : c'est l'œuvre la mieux notée du corpus ($\overline{N}$ ≈ 8,93), et pourtant aucune IA ne la mentionne. C'est l'illustration la plus nette du décalage entre amour populaire et reconnaissance critique technique.
+
+
+## 6. Limites de l'étude
+
+Quatre principales limites doivent être gardées à l'esprit lors de la lecture des classements.
+
+**6.1 — Snapshot temporel.** Les notes publiques et les listes IA captent un instant : les notes Babelio/Goodreads évoluent quotidiennement, les listes IA dépendent de la version du modèle interrogé. Les écarts mineurs entre les notes affichées dans les listes TOP 10 source et celles du tableau consolidé proviennent d'arrondis et de dates de capture différents — c'est le tableau consolidé qui fait foi ici.
+
+**6.2 — Biais culturel des plateformes.** Goodreads est principalement anglophone et privilégie naturellement les classiques traduits sur l'inédit français ; Babelio plébiscite les best-sellers émotionnels récents (Perrin, Lemaitre, Gary) ; Reddit favorise le canon « sérieux » académique ; SensCritique sur-représente la SF et le genre. La triangulation ne neutralise pas entièrement ces biais.
+
+**6.3 — Biais des modèles d'IA.** Les trois IA ont chacune leur profil culturel : Claude a une forte présence du canon classique francophone, ChatGPT favorise une culture mondiale large avec biais anglophone, Gemini a une approche plus contemporaine et plus orientée XXIᵉ siècle. Une œuvre absente de toutes les listes IA n'est pas pour autant médiocre — elle peut simplement appartenir à un canon (populaire, théâtral, poétique) sous-représenté dans les corpus d'entraînement.
+
+**6.4 — Approximation du score composite.** Les pondérations (0,45 / 0,25 / 0,30) sont défendables mais arbitraires. Une pondération différente déplacerait légèrement l'ordre du TOP 10. Le rang n'est *robuste* qu'au sens où il est stable sur de larges plages de pondération — ce qui est bien le cas pour les cinq premiers du TOP 10 général. Les rangs 6-10 sont plus sensibles.
+
+## 7. Classements conclusifs
+
+### 7.1 — TOP 10 général
+
+Classement principal : meilleur score composite $S$ sur l'ensemble du corpus francophone, sans contrainte de longueur ni d'époque.
+
+| # | Œuvre | Auteur | Année | $\overline{N}$ | $n_{T10}$ | $m_{IA}$ | $S$ |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | **L'Étranger** | Albert Camus | 1942 | 8,27 | 4 | 13 | 0,785 |
+| 2 | **Les Misérables** | Victor Hugo | 1862 | 8,80 | 4 | 5 | 0,709 |
+| 3 | **À la recherche du temps perdu** | Marcel Proust | 1927 | 8,73 | 2 | 15 | 0,706 |
+| 4 | **Le Comte de Monte-Cristo** | Alexandre Dumas | 1844 | 8,87 | 4 | 0 | 0,649 |
+| 5 | **Voyage au bout de la nuit** | Louis-Ferdinand Céline | 1932 | 8,67 | 2 | 9 | 0,627 |
+| 6 | **Le Petit Prince** | Antoine de Saint-Exupéry | 1943 | 8,83 | 3 | 1 | 0,597 |
+| 7 | **Madame Bovary** | Gustave Flaubert | 1857 | 7,43 | 1 | 14 | 0,572 |
+| 8 | **Cyrano de Bergerac** | Edmond Rostand | 1897 | 8,93 | 2 | 0 | 0,527 |
+| 9 | **Au revoir là-haut** | Pierre Lemaitre | 2013 | 8,60 | 2 | 1 | 0,524 |
+| 10 | **La Promesse de l'aube** | Romain Gary | 1960 | 8,73 | 2 | 0 | 0,518 |
+
+### 7.2 — TOP 5 contemporain *(post-1950)*
+
+Filtre : œuvres francophones publiées à partir de 1950, classées par score composite. Permet d'identifier les valeurs sûres de la seconde moitié du XXᵉ et du XXIᵉ siècle, hors monuments classiques.
+
+| # | Œuvre | Auteur | Année | $\overline{N}$ | $S$ |
+| --- | --- | --- | --- | --- | --- |
+| 1 | **Au revoir là-haut** | Pierre Lemaitre | 2013 | 8,60 | 0,524 |
+| 2 | **La Promesse de l'aube** | Romain Gary | 1960 | 8,73 | 0,518 |
+| 3 | **La Horde du contrevent** | Alain Damasio | 2004 | 8,40 | 0,453 |
+| 4 | **Changer l'eau des fleurs** | Valérie Perrin | 2018 | 8,23 | 0,433 |
+| 5 | **Mémoires d'Hadrien** | Marguerite Yourcenar | 1951 | 8,60 | 0,424 |
+
+### 7.3 — TOP 5 courts *(< 250 pages)*
+
+Filtre : œuvres francophones de moins de 250 pages (whitelist explicite), classées par score composite. Permet d'identifier les chefs-d'œuvre brefs, lisibles en un week-end.
+
+| # | Œuvre | Auteur | Année | $\overline{N}$ | $S$ |
+| --- | --- | --- | --- | --- | --- |
+| 1 | **L'Étranger** | Albert Camus | 1942 | 8,27 | 0,785 |
+| 2 | **Le Petit Prince** | Antoine de Saint-Exupéry | 1943 | 8,83 | 0,597 |
+| 3 | **Candide** | Voltaire | 1759 | 7,63 | 0,493 |
+| 4 | **La Nausée** | Jean-Paul Sartre | 1938 | 7,77 | 0,424 |
+| 5 | **La Princesse de Clèves** | Madame de La Fayette | 1678 | 6,60 | 0,409 |
+
+### 7.4 — TOP 5 « pour commencer »
+
+Filtre : œuvres francophones particulièrement accessibles (narration plot-driven, langue limpide, plaisir immédiat), classées par score d'accessibilité $S_{acc}$. Volontairement exclus : *Les Misérables*, *À la recherche*, *Voyage au bout de la nuit* — trop denses pour démarrer.
+
+| # | Œuvre | Auteur | Année | $\overline{N}$ | $S_{acc}$ |
+| --- | --- | --- | --- | --- | --- |
+| 1 | **Le Comte de Monte-Cristo** | Alexandre Dumas | 1844 | 8,87 | 0,922 |
+| 2 | **L'Étranger** | Albert Camus | 1942 | 8,27 | 0,881 |
+| 3 | **Le Petit Prince** | Antoine de Saint-Exupéry | 1943 | 8,83 | 0,847 |
+| 4 | **Cyrano de Bergerac** | Edmond Rostand | 1897 | 8,93 | 0,779 |
+| 5 | **La Promesse de l'aube** | Romain Gary | 1960 | 8,73 | 0,771 |
+
+## 8. Fiches détaillées
+
+<BookTabs books={literatureBooks} />
+
+*Document généré à partir de 101 œuvres, 4 plateformes (SensCritique, Babelio, Goodreads, Reddit), 3 IA (Claude, ChatGPT, Gemini), 8 catégories analytiques.*

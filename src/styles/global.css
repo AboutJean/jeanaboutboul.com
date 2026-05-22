@@ -466,6 +466,341 @@
     @apply my-2;
   }
 
+  .notes-hero {
+    @apply overflow-hidden border border-line bg-paper-raised p-6 sm:p-8;
+    background-image:
+      radial-gradient(circle at top right, rgba(213, 43, 30, 0.12), transparent 28%),
+      linear-gradient(135deg, rgba(248, 248, 249, 0.72), rgba(255, 255, 255, 0.95));
+  }
+
+  .dark .notes-hero {
+    background-image:
+      radial-gradient(circle at top right, rgba(224, 72, 60, 0.16), transparent 24%),
+      linear-gradient(135deg, rgba(31, 31, 35, 0.96), rgba(20, 20, 22, 0.98));
+  }
+
+  .notes-hero-grid {
+    @apply grid gap-8 lg:grid-cols-[minmax(0,1.5fr)_minmax(17rem,0.8fr)] lg:items-end;
+  }
+
+  .notes-overview-grid {
+    @apply grid gap-3 sm:grid-cols-2;
+  }
+
+  .notes-overview-card {
+    @apply flex min-h-[8.5rem] flex-col justify-between border border-line bg-paper px-4 py-4;
+  }
+
+  .notes-overview-value {
+    @apply text-3xl font-bold tracking-tight text-ink sm:text-4xl;
+  }
+
+  .notes-overview-label {
+    @apply font-sans text-[0.72rem] uppercase tracking-[0.18em] text-ink-faint;
+  }
+
+  .notes-signal-grid {
+    @apply mt-8 grid gap-4 lg:grid-cols-3;
+  }
+
+  .notes-signal-card {
+    @apply border border-line bg-paper-raised p-5;
+  }
+
+  .notes-signal-title {
+    @apply text-xl font-bold tracking-tight text-ink;
+  }
+
+  .notes-source-strip {
+    @apply mt-6 flex flex-wrap gap-2;
+  }
+
+  .notes-source-strip span {
+    @apply inline-flex items-center border border-line bg-paper-raised px-3 py-2 font-sans text-[0.68rem] uppercase tracking-[0.16em] text-ink-soft;
+  }
+
+  .notes-chart-grid {
+    @apply mt-8 grid gap-5 lg:grid-cols-2;
+  }
+
+  .notes-chart-card {
+    @apply overflow-hidden border border-line bg-paper-raised;
+  }
+
+  .notes-chart-card--wide {
+    @apply lg:col-span-2;
+  }
+
+  .notes-chart-card img {
+    @apply block w-full bg-white p-3 dark:bg-paper-subtle;
+  }
+
+  .notes-chart-card figcaption {
+    @apply border-t border-line px-5 py-5;
+  }
+
+  .notes-chart-title {
+    @apply font-sans text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-accent;
+  }
+
+  .notes-chart-insight {
+    @apply border-l-2 border-accent/60 pl-4 text-sm leading-relaxed text-ink;
+  }
+
+  .notes-ranking-grid {
+    @apply mt-8 grid gap-5 xl:grid-cols-2;
+  }
+
+  .notes-ranking-card {
+    @apply border border-line bg-paper-raised p-5;
+  }
+
+  .notes-ranking-table {
+    @apply min-w-full border-collapse;
+  }
+
+  .notes-ranking-table thead th {
+    @apply border-b border-line pb-3 text-left font-sans text-[0.68rem] uppercase tracking-[0.16em] text-ink-faint;
+  }
+
+  .notes-ranking-table tbody td {
+    @apply border-b border-line/70 py-3 pr-4 text-sm leading-relaxed text-ink-soft;
+  }
+
+  .notes-ranking-table tbody td:first-child,
+  .notes-ranking-table tbody td:nth-child(2) {
+    @apply text-ink;
+  }
+
+  .notes-ranking-table tbody tr:last-child td {
+    @apply border-b-0 pb-0;
+  }
+
+  .notes-highlight-grid {
+    @apply mt-8 grid gap-4 md:grid-cols-2;
+  }
+
+  .notes-highlight-card {
+    @apply border border-line bg-paper-raised p-5;
+  }
+
+  .notes-highlight-title {
+    @apply text-xl font-bold tracking-tight text-ink;
+  }
+
+  .literature-corpus {
+    @apply my-8;
+  }
+
+  .literature-corpus-header {
+    @apply mb-4 px-1;
+  }
+
+  .literature-corpus-kicker {
+    @apply m-0 font-sans text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-accent;
+  }
+
+  .literature-corpus-caption {
+    @apply mt-2 mb-0 text-sm leading-relaxed text-ink-soft;
+  }
+
+  .literature-corpus-breakout {
+    margin-inline: -1.25rem;
+  }
+
+  .literature-corpus-shell {
+    @apply overflow-x-auto border-y border-line bg-paper;
+    scrollbar-width: thin;
+  }
+
+  .literature-corpus-table {
+    border-collapse: separate;
+    border-spacing: 0;
+    min-width: 108rem;
+    width: max-content;
+  }
+
+  .literature-corpus-head {
+    @apply border-b border-line bg-paper-subtle px-3 py-3 text-left font-sans text-[0.66rem] font-semibold uppercase tracking-[0.16em] text-ink-faint;
+    top: 0;
+    position: sticky;
+    z-index: 4;
+  }
+
+  .literature-corpus-row:nth-child(odd) {
+    background-color: rgb(var(--color-paper-raised));
+  }
+
+  .literature-corpus-row:nth-child(even) {
+    background-color: rgb(var(--color-paper));
+  }
+
+  .literature-corpus-row.is-top {
+    background-image: linear-gradient(90deg, rgba(213, 43, 30, 0.06), transparent 36%);
+  }
+
+  .dark .literature-corpus-row.is-top {
+    background-image: linear-gradient(90deg, rgba(224, 72, 60, 0.12), transparent 36%);
+  }
+
+  .literature-corpus-cell {
+    @apply border-b border-line/70 px-3 py-3 text-sm leading-relaxed text-ink-soft align-top;
+  }
+
+  .literature-corpus-cell.is-title-cell,
+  .literature-corpus-cell.is-rank,
+  .literature-corpus-cell.is-author {
+    @apply text-ink;
+  }
+
+  .literature-corpus-cell.is-ai {
+    @apply font-sans text-[0.76rem] uppercase tracking-[0.08em];
+  }
+
+  .literature-corpus-cell.is-empty {
+    @apply text-ink-faint;
+  }
+
+  .literature-corpus-head.is-sticky,
+  .literature-corpus-cell.is-sticky {
+    position: sticky;
+  }
+
+  .literature-corpus-head.is-rank,
+  .literature-corpus-cell.is-rank {
+    left: 0;
+    min-width: 4.5rem;
+    max-width: 4.5rem;
+    z-index: 3;
+  }
+
+  .literature-corpus-head.is-title,
+  .literature-corpus-cell.is-title {
+    left: 4.5rem;
+    min-width: 18rem;
+    max-width: 18rem;
+    z-index: 3;
+  }
+
+  .literature-corpus-head.is-author,
+  .literature-corpus-cell.is-author {
+    left: 22.5rem;
+    min-width: 15rem;
+    max-width: 15rem;
+    z-index: 3;
+  }
+
+  .literature-corpus-head.is-rank,
+  .literature-corpus-head.is-title,
+  .literature-corpus-head.is-author {
+    background-color: rgb(var(--color-paper-subtle));
+    z-index: 5;
+  }
+
+  .literature-corpus-cell.is-rank,
+  .literature-corpus-cell.is-title,
+  .literature-corpus-cell.is-author {
+    box-shadow: 1px 0 0 rgb(var(--color-line));
+  }
+
+  .literature-rank-pill {
+    @apply inline-flex min-w-[2.2rem] items-center justify-center border border-accent/30 bg-accent/10 px-2 py-1 font-sans text-[0.68rem] font-semibold text-accent;
+  }
+
+  .literature-rating {
+    @apply inline-flex items-center gap-1.5;
+  }
+
+  .literature-rating-star {
+    @apply text-accent;
+  }
+
+  .book-tab-list {
+    @apply flex gap-2 overflow-x-auto pb-2;
+    scrollbar-width: thin;
+  }
+
+  .book-tab-button {
+    @apply inline-flex items-center gap-3 whitespace-nowrap border border-line bg-paper-raised px-4 py-3 font-sans text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-ink-soft transition-colors hover:border-line-strong hover:text-ink;
+  }
+
+  .book-tab-button.is-active {
+    @apply border-accent bg-accent text-white;
+  }
+
+  .book-tab-rank {
+    @apply inline-flex h-7 min-w-7 items-center justify-center border border-current px-1 text-[0.64rem];
+  }
+
+  .book-panel {
+    @apply border border-line bg-paper-raised p-5 sm:p-6;
+  }
+
+  .book-panel-grid {
+    @apply grid gap-6 lg:grid-cols-[minmax(14rem,17rem)_minmax(0,1fr)];
+  }
+
+  .book-cover-frame {
+    @apply aspect-[2/3] overflow-hidden border border-line bg-paper p-3;
+  }
+
+  .book-cover-image {
+    @apply block h-full w-full object-contain;
+  }
+
+  .book-panel-copy {
+    @apply min-w-0;
+  }
+
+  .book-presence-chip {
+    @apply inline-flex items-center border border-accent/25 bg-accent/10 px-3 py-2 font-sans text-[0.68rem] uppercase tracking-[0.16em] text-accent;
+  }
+
+  .book-score-grid {
+    @apply mt-8 grid gap-3 sm:grid-cols-2 xl:grid-cols-4;
+  }
+
+  .book-score-card {
+    @apply border border-line bg-paper p-4;
+  }
+
+  .book-score-label {
+    @apply block font-sans text-[0.68rem] uppercase tracking-[0.16em] text-ink-faint;
+  }
+
+  .book-score-value {
+    @apply mt-2 block text-2xl font-bold tracking-tight text-ink;
+  }
+
+  .book-category-chip {
+    @apply inline-flex flex-col gap-1 border border-line bg-paper px-3 py-2 text-sm text-ink-soft;
+  }
+
+  .book-category-chip strong {
+    @apply font-sans text-[0.68rem] uppercase tracking-[0.16em] text-ink;
+  }
+
+  .book-source-table {
+    @apply min-w-full border-collapse;
+  }
+
+  .book-source-table th {
+    @apply border-b border-line pb-3 text-left font-sans text-[0.68rem] uppercase tracking-[0.16em] text-ink-faint;
+  }
+
+  .book-source-table td {
+    @apply border-b border-line/70 py-3 pr-4 text-sm leading-relaxed text-ink-soft align-top;
+  }
+
+  .book-source-table td:first-child,
+  .book-source-table td:nth-child(2) {
+    @apply text-ink;
+  }
+
+  .book-source-table tr:last-child td {
+    @apply border-b-0 pb-0;
+  }
+
   .business-card-copy {
     font-family: "Garamond Classico", "Adobe Garamond Pro", "EB Garamond", "Garamond", serif;
     font-variant-caps: all-small-caps;
@@ -478,6 +813,12 @@
 
   .contact-business-card:hover {
     transform: scale(1.02);
+  }
+}
+
+@media (min-width: 768px) {
+  .literature-corpus-breakout {
+    margin-inline: -2rem;
   }
 }
 

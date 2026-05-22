@@ -1,0 +1,133 @@
+---
+import { literatureCorpusRows } from "../../data/literatureCorpus";
+import type { LiteratureCorpusRow } from "../../data/literatureCorpus";
+
+const columns = [
+  { key: "rank", label: "#" },
+  { key: "title", label: "Titre" },
+  { key: "author", label: "Auteur" },
+  { key: "general", label: "Général" },
+  { key: "mechanics", label: "Méca. Nar." },
+  { key: "style", label: "Style" },
+  { key: "psychology", label: "Psycho." },
+  { key: "philosophy", label: "Philo." },
+  { key: "short", label: "Courts" },
+  { key: "contemporary", label: "Contemp." },
+  { key: "foreign", label: "Étranger" },
+  { key: "scoreTotal", label: "Score T." },
+  { key: "sc", label: "SC" },
+  { key: "bab", label: "Bab" },
+  { key: "gr", label: "GR" },
+  { key: "reddit", label: "Reddit" },
+] as const;
+
+const ratingColumns = new Set(["sc", "bab", "gr", "reddit"]);
+const aiColumns = new Set([
+  "general",
+  "mechanics",
+  "style",
+  "psychology",
+  "philosophy",
+  "short",
+  "contemporary",
+  "foreign",
+]);
+
+const corpusRows = literatureCorpusRows.map((row) => ({
+  ...row,
+  isTop: Number.parseInt(row.rank, 10) <= 10,
+}));
+
+type ColumnKey = (typeof columns)[number]["key"];
+
+function splitRating(value: string) {
+  if (value === "★") {
+    return { main: "", star: true };
+  }
+
+  if (value.endsWith("★")) {
+    return { main: value.replace("★", "").trim(), star: true };
+  }
+
+  return { main: value, star: false };
+}
+
+function getValue(row: LiteratureCorpusRow, key: ColumnKey) {
+  return row[key];
+}
+
+function isRatingColumn(key: ColumnKey) {
+  return ratingColumns.has(key);
+}
+
+function isAiColumn(key: ColumnKey) {
+  return aiColumns.has(key);
+}
+---
+
+<div class="literature-corpus not-prose">
+  <div class="literature-corpus-header">
+    <p class="literature-corpus-kicker">Tableau consolidé</p>
+    <p class="literature-corpus-caption">
+      Lecture plus confortable: colonnes fixes au début, scroll horizontal pour le détail, et
+      mise en valeur légère du TOP 10.
+    </p>
+  </div>
+
+  <div class="literature-corpus-breakout">
+    <div class="literature-corpus-shell">
+      <table class="literature-corpus-table">
+        <thead>
+          <tr>
+            {columns.map((column) => (
+              <th class:list={[
+                "literature-corpus-head",
+                column.key === "rank" && "is-sticky is-rank",
+                column.key === "title" && "is-sticky is-title",
+                column.key === "author" && "is-sticky is-author",
+              ]}>
+                {column.label}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {corpusRows.map((row) => (
+            <tr class:list={["literature-corpus-row", row.isTop && "is-top"]}>
+              {columns.map((column) => {
+                const value = getValue(row, column.key);
+                const rating = isRatingColumn(column.key) ? splitRating(value) : null;
+                const isEmpty = value === "—";
+
+                return (
+                  <td class:list={[
+                    "literature-corpus-cell",
+                    column.key === "rank" && "is-sticky is-rank",
+                    column.key === "title" && "is-sticky is-title is-title-cell",
+                    column.key === "author" && "is-sticky is-author",
+                    isAiColumn(column.key) && "is-ai",
+                    isEmpty && "is-empty",
+                  ]}>
+                    {
+                      column.key === "rank" ? (
+                        <span class="literature-rank-pill">{row.rank}</span>
+                      ) : rating ? (
+                        <span class="literature-rating">
+                          {rating.main && <span>{rating.main}</span>}
+                          {rating.star && <span class="literature-rating-star">★</span>}
+                          {!rating.main && !rating.star && <span>{value}</span>}
+                        </span>
+                      ) : (
+                        value
+                      )
+                    }
+                  </td>
+                );
+              })}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
