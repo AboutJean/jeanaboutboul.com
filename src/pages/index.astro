@@ -1,7 +1,14 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import { getCollection } from "astro:content";
-import { formatSemesterOrMonth, getTalkCategoryLabel, isEpflTalk } from "../utils/content";
+import {
+  formatSemesterOrMonth,
+  getProjectAccentTone,
+  getTalkAccentTone,
+  getTalkCategoryLabel,
+  isEpflTalk,
+  type AccentTone,
+} from "../utils/content";
 
 const allProjects = (await getCollection("projects")).sort(
   (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
@@ -10,14 +17,46 @@ const allTalks = (await getCollection("talks")).sort(
   (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
 );
 
-const recentProject = allProjects.slice(0, 1);
-const recentTalks = allTalks.slice(0, 2);
+const recentProjects = allProjects.slice(0, 2);
+const recentTalks = allTalks.slice(0, 3);
+const homeFacts: Array<{ label: string; tone: AccentTone; withLine: boolean; value: string[] }> = [
+  {
+    label: "Current focus",
+    tone: "yellow",
+    withLine: false,
+    value: ["Robotics, control, embedded", "electronics, and technical", "communication."],
+  },
+  {
+    label: "Interests",
+    tone: "red",
+    withLine: true,
+    value: ["Music, philosophy."],
+  },
+  {
+    label: "Studying",
+    tone: "blue",
+    withLine: true,
+    value: ["BSc Microengineering, EPFL."],
+  },
+  {
+    label: "Based in",
+    tone: "yellow",
+    withLine: true,
+    value: ["Lausanne, Switzerland."],
+  },
+  {
+    label: "Elsewhere",
+    tone: "yellow",
+    withLine: true,
+    value: ["jeanaboutboul@gmail.com", "GitHub / LinkedIn"],
+  },
+];
 ---
 
 <Layout title="Jean Aboutboul">
   <section class="grid gap-12 lg:grid-cols-[minmax(0,1.7fr)_15rem] lg:items-start">
     <div>
-      <h1 class="max-w-4xl text-4xl font-bold tracking-tight text-ink sm:text-5xl">
+      <h1 class="max-w-4xl text-3xl font-bold leading-[0.95] tracking-tight text-ink sm:text-5xl lg:text-6xl">
         EN CONSTRUCTION...
       </h1>
 
@@ -35,57 +74,84 @@ const recentTalks = allTalks.slice(0, 2);
           Read notes
         </a>
       </div>
+
+      <div class="home-kinetic-panel hidden lg:block" aria-hidden="true">
+        <span class="home-kinetic-panel__line home-kinetic-panel__line--h1"></span>
+        <span class="home-kinetic-panel__line home-kinetic-panel__line--h2"></span>
+        <span class="home-kinetic-panel__line home-kinetic-panel__line--v1"></span>
+        <span class="home-kinetic-panel__line home-kinetic-panel__line--v2"></span>
+        <span class="home-kinetic-panel__tile home-kinetic-panel__tile--yellow"></span>
+        <span class="home-kinetic-panel__tile home-kinetic-panel__tile--red"></span>
+        <span class="home-kinetic-panel__tile home-kinetic-panel__tile--blue"></span>
+        <span class="home-kinetic-panel__tile home-kinetic-panel__tile--paper"></span>
+        <span class="home-kinetic-panel__tile home-kinetic-panel__tile--ink"></span>
+      </div>
     </div>
 
-    <dl class="space-y-6 border-l border-line pl-6 pt-1 font-sans">
-      <div class="space-y-2">
-        <dt class="text-[0.68rem] uppercase tracking-[0.22em] text-ink-faint">Current focus</dt>
-        <dd class="text-sm leading-relaxed text-ink-soft">
-          Robotics, control, embedded electronics, and technical communication.
-        </dd>
-      </div>
+    <dl class="home-hero__facts space-y-0 pt-1">
+      {homeFacts.map((fact) => (
+        <div class="home-hero__fact">
+          <div class:list={["home-hero__fact-rule", !fact.withLine && "is-detached"]} aria-hidden="true">
+            <span
+              class:list={[
+                "home-hero__fact-block",
+                fact.tone === "yellow" && "home-hero__fact-block--yellow",
+                fact.tone === "red" && "home-hero__fact-block--red",
+                fact.tone === "blue" && "home-hero__fact-block--blue",
+              ]}
+            ></span>
+            {fact.withLine && <span class="home-hero__fact-line"></span>}
+          </div>
 
-      <div class="space-y-2">
-        <dt class="text-[0.68rem] uppercase tracking-[0.22em] text-ink-faint">Interests</dt>
-        <dd class="text-sm leading-relaxed text-ink-soft">Music, philosophy.</dd>
-      </div>
+          <dt class="text-[0.68rem] uppercase tracking-[0.22em] text-ink-faint">{fact.label}</dt>
 
-      <div class="space-y-2">
-        <dt class="text-[0.68rem] uppercase tracking-[0.22em] text-ink-faint">Studying</dt>
-        <dd class="text-sm leading-relaxed text-ink-soft">BSc Microengineering, EPFL.</dd>
-      </div>
-
-      <div class="space-y-2">
-        <dt class="text-[0.68rem] uppercase tracking-[0.22em] text-ink-faint">Based in</dt>
-        <dd class="text-sm leading-relaxed text-ink-soft">Lausanne, Switzerland.</dd>
-      </div>
-
-      <div class="space-y-2">
-        <dt class="text-[0.68rem] uppercase tracking-[0.22em] text-ink-faint">Elsewhere</dt>
-        <dd class="space-y-1 text-sm leading-relaxed text-ink-soft">
-          <p>
-            <a href="mailto:jeanaboutboul@gmail.com" class="hover:text-accent">
-              jeanaboutboul@gmail.com
-            </a>
-          </p>
-          <p>
-            <a href="https://github.com/AboutJean" class="hover:text-accent">GitHub</a>
-            {" / "}
-            <a href="https://www.linkedin.com/in/jean-aboutboul" class="hover:text-accent">
-              LinkedIn
-            </a>
-          </p>
-        </dd>
-      </div>
+          {fact.label === "Elsewhere" ? (
+            <dd class="space-y-1 text-sm leading-relaxed text-ink-soft">
+              <p class="m-0">
+                <a href="mailto:jeanaboutboul@gmail.com" class="hover:text-accent">
+                  {fact.value[0]}
+                </a>
+              </p>
+              <p class="m-0">
+                <a href="https://github.com/AboutJean" class="hover:text-accent">GitHub</a>
+                {" / "}
+                <a href="https://www.linkedin.com/in/jean-aboutboul" class="hover:text-accent">
+                  LinkedIn
+                </a>
+              </p>
+            </dd>
+          ) : (
+            <dd class="space-y-1 text-sm leading-relaxed text-ink-soft">
+              {fact.value.map((line) => (
+                <p class="m-0">{line}</p>
+              ))}
+            </dd>
+          )}
+        </div>
+      ))}
     </dl>
   </section>
 
-  <section class="mt-16 grid gap-8 pt-10 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.9fr)]">
-    <div>
-      <p class="kicker">Recent project</p>
-      <div class="mt-4 border-y border-line py-4">
-        {recentProject.map((project) => (
-          <a href={`/projects/${project.id}`} class="interactive-card card-padding-lg">
+  <section class="home-feature-grid mt-16 grid gap-8 pt-10 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.9fr)]">
+    <div class="home-feature-column">
+      <div class="flex items-baseline justify-between gap-4">
+        <p class="kicker">Recent projects</p>
+        <a
+          href="/projects"
+          class="font-sans text-[0.68rem] uppercase tracking-[0.18em] text-ink-faint hover:text-accent"
+        >
+          All projects
+        </a>
+      </div>
+      <div class="home-feature-list home-feature-list--projects mt-4">
+        {recentProjects.map((project) => (
+          <a
+            href={`/projects/${project.id}`}
+            class:list={[
+              "home-feature-card home-feature-card--project interactive-card card-padding-lg",
+              `accent-${getProjectAccentTone(project)}`,
+            ]}
+          >
             <h2 class="text-3xl font-bold tracking-tight text-ink">{project.data.title}</h2>
             <p class="mt-4 max-w-2xl text-base leading-relaxed text-ink-soft">
               {project.data.summary}
@@ -102,7 +168,7 @@ const recentTalks = allTalks.slice(0, 2);
       </div>
     </div>
 
-    <div>
+    <div class="home-feature-column">
       <div class="flex items-baseline justify-between gap-4">
         <p class="kicker">Recent notes</p>
         <a
@@ -113,11 +179,24 @@ const recentTalks = allTalks.slice(0, 2);
         </a>
       </div>
 
-      <div class="mt-4 border-y border-line py-4">
-        <div class="grid gap-4">
-          {recentTalks.map((talk) => (
-            <a href={`/talks/${talk.id}`} class="interactive-card card-padding">
-              <p class="font-sans text-[0.68rem] uppercase tracking-[0.18em] text-accent">
+      <div class="home-feature-list home-feature-list--notes mt-4">
+        {recentTalks.map((talk) => {
+          const accentTone = getTalkAccentTone(talk);
+
+          return (
+            <a
+              href={`/talks/${talk.id}`}
+              class:list={[
+                "home-feature-card home-feature-card--note interactive-card card-padding",
+                `accent-${accentTone}`,
+              ]}
+            >
+              <p
+                class:list={[
+                  "accent-copy font-sans text-[0.68rem] uppercase tracking-[0.18em]",
+                  `accent-copy--${accentTone}`,
+                ]}
+              >
                 {getTalkCategoryLabel(talk)}
               </p>
               <h3 class="mt-3 text-2xl font-bold tracking-tight text-ink">{talk.data.title}</h3>
@@ -128,8 +207,8 @@ const recentTalks = allTalks.slice(0, 2);
                 {formatSemesterOrMonth(talk.data.date, isEpflTalk(talk))}
               </time>
             </a>
-          ))}
-        </div>
+          );
+        })}
       </div>
     </div>
   </section>

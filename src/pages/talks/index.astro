@@ -3,6 +3,7 @@ import Layout from "../../layouts/Layout.astro";
 import { getCollection } from "astro:content";
 import {
   formatSemesterOrMonth,
+  getTalkAccentTone,
   getTalkCategoryLabel,
   getTalkVenueLabel,
   isEpflTalk,
@@ -54,37 +55,46 @@ const categories = [...new Set(talks.map((talk) => getTalkCategoryLabel(talk)))]
     </div>
 
     <div id="talks-list" class="mt-8 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-      {talks.map((talk) => (
-        <a
-          href={`/talks/${talk.id}`}
-          class="talk-item interactive-card card-padding"
-          data-title={talk.data.title.toLowerCase()}
-          data-summary={talk.data.summary.toLowerCase()}
-          data-category={getTalkCategoryLabel(talk)}
-          data-tags={talk.data.tags.join(" ").toLowerCase()}
-        >
-          <div class="flex flex-wrap items-center gap-x-3 gap-y-2 font-sans text-[0.68rem] uppercase tracking-[0.18em] text-ink-faint">
-            <span class="text-accent">{getTalkCategoryLabel(talk)}</span>
-            <time>
-              {formatSemesterOrMonth(talk.data.date, isEpflTalk(talk))}
-            </time>
-          </div>
+      {talks.map((talk) => {
+        const accentTone = getTalkAccentTone(talk);
 
-          <h2 class="mt-4 text-2xl font-bold tracking-tight text-ink">
-            {talk.data.title}
-          </h2>
+        return (
+          <a
+            href={`/talks/${talk.id}`}
+            class:list={[
+              "talk-item interactive-card card-padding",
+              `accent-${accentTone}`,
+            ]}
+            data-title={talk.data.title.toLowerCase()}
+            data-summary={talk.data.summary.toLowerCase()}
+            data-category={getTalkCategoryLabel(talk)}
+            data-tags={talk.data.tags.join(" ").toLowerCase()}
+          >
+            <div class="flex flex-wrap items-center gap-x-3 gap-y-2 font-sans text-[0.68rem] uppercase tracking-[0.18em] text-ink-faint">
+              <span class:list={["accent-copy", `accent-copy--${accentTone}`]}>
+                {getTalkCategoryLabel(talk)}
+              </span>
+              <time>
+                {formatSemesterOrMonth(talk.data.date, isEpflTalk(talk))}
+              </time>
+            </div>
 
-          {getTalkVenueLabel(talk) && (
-            <p class="mt-3 text-sm leading-relaxed text-ink-soft">
-              {getTalkVenueLabel(talk)}
+            <h2 class="mt-4 text-2xl font-bold tracking-tight text-ink">
+              {talk.data.title}
+            </h2>
+
+            {getTalkVenueLabel(talk) && (
+              <p class="mt-3 text-sm leading-relaxed text-ink-soft">
+                {getTalkVenueLabel(talk)}
+              </p>
+            )}
+
+            <p class="mt-4 font-sans text-[0.68rem] uppercase tracking-[0.16em] text-ink-faint">
+              {talk.data.tags.join(" · ")}
             </p>
-          )}
-
-          <p class="mt-4 font-sans text-[0.68rem] uppercase tracking-[0.16em] text-ink-faint">
-            {talk.data.tags.join(" · ")}
-          </p>
-        </a>
-      ))}
+          </a>
+        );
+      })}
     </div>
 
     <p

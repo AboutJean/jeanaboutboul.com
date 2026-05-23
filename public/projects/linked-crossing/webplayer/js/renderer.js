@@ -26,7 +26,7 @@ export class LinkedCrossingRenderer {
     const width = canvas.width / (window.devicePixelRatio || 1);
     const height = canvas.height / (window.devicePixelRatio || 1);
     ctx.clearRect(0, 0, width, height);
-    ctx.fillStyle = "#ffffff";
+    ctx.fillStyle = "#f8f9fa";
     ctx.fillRect(0, 0, width, height);
   }
 

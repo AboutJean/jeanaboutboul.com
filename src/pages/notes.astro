@@ -1,0 +1,190 @@
+---
+import BookTabs from "../components/notes/BookTabs.astro";
+import Layout from "../layouts/Layout.astro";
+import {
+  literatureBooks,
+  literatureCharts,
+  literatureHighlightCards,
+  literatureOverviewStats,
+  literatureRankings,
+  literatureSignalCards,
+} from "../data/literatureNote";
+---
+
+<Layout
+  title="Notes — Jean Aboutboul"
+  description="Note personnelle sur la littérature française, avec classements et fiches de lecture."
+>
+  <section class="notes-hero">
+    <div class="notes-hero-grid">
+      <div>
+        <p class="kicker text-accent">Note personnelle</p>
+        <h1 class="mt-4 text-5xl font-bold tracking-tight text-ink sm:text-6xl">NOTES</h1>
+        <p class="mt-6 max-w-3xl text-lg leading-relaxed text-ink-soft sm:text-xl">
+          Étude croisée multi-sources sur les grands livres de la littérature française. Le but
+          ici n&apos;est pas de figer un canon définitif, mais de comparer ce que disent ensemble
+          les lecteurs, les classements publics et les IA.
+        </p>
+        <p class="mt-4 max-w-3xl text-base leading-relaxed text-ink-soft">
+          Cette page est une version éditorialisée du rapport: méthode, visualisations,
+          classements conclusifs, puis fiches de lecture avec onglets pour les livres qui
+          ressortent le plus nettement.
+        </p>
+      </div>
+
+      <div class="notes-overview-grid">
+        {literatureOverviewStats.map((stat) => (
+          <div class="notes-overview-card">
+            <span class="notes-overview-value">{stat.value}</span>
+            <span class="notes-overview-label">{stat.label}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="mt-16">
+    <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+      <div>
+        <p class="kicker">Méthode</p>
+        <h2 class="mt-3 text-3xl font-bold tracking-tight text-ink">Trois signaux, un score final</h2>
+      </div>
+      <p class="max-w-2xl text-sm leading-relaxed text-ink-soft">
+        Pondération finale: 45% consensus public, 25% présence dans les TOP 10, 30% convergence
+        IA. Le score reste volontairement simple pour rendre visibles les écarts de perception.
+      </p>
+    </div>
+
+    <div class="notes-signal-grid">
+      {literatureSignalCards.map((card) => (
+        <article class="notes-signal-card">
+          <h3 class="notes-signal-title">{card.title}</h3>
+          <p class="mt-4 text-sm leading-relaxed text-ink-soft">{card.body}</p>
+        </article>
+      ))}
+    </div>
+
+    <div class="notes-source-strip">
+      <span>Sources publiques: SensCritique, Babelio, Goodreads, Reddit</span>
+      <span>IA: Claude, ChatGPT, Gemini</span>
+      <span>Répartition: général, style, psychologie, philo, courts, contemporain, etc.</span>
+    </div>
+  </section>
+
+  <section class="mt-20">
+    <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+      <div>
+        <p class="kicker">Analyses visuelles</p>
+        <h2 class="mt-3 text-3xl font-bold tracking-tight text-ink">Ce que les graphiques racontent</h2>
+      </div>
+      <p class="max-w-2xl text-sm leading-relaxed text-ink-soft">
+        Les visualisations servent surtout à isoler trois phénomènes: le consensus absolu, les
+        angles morts des IA et l&apos;énorme inertie du XIXᵉ siècle.
+      </p>
+    </div>
+
+    <div class="notes-chart-grid">
+      {literatureCharts.map((chart, index) => (
+        <figure class:list={["notes-chart-card", index === 0 && "notes-chart-card--wide"]}>
+          <img src={chart.src} alt={chart.alt} loading="lazy" />
+          <figcaption>
+            <div class="flex flex-col gap-3">
+              <div>
+                <p class="notes-chart-title">{chart.title}</p>
+                <p class="mt-2 text-sm leading-relaxed text-ink-soft">{chart.caption}</p>
+              </div>
+              <p class="notes-chart-insight">{chart.insight}</p>
+            </div>
+          </figcaption>
+        </figure>
+      ))}
+    </div>
+  </section>
+
+  <section class="mt-20">
+    <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+      <div>
+        <p class="kicker">Classements</p>
+        <h2 class="mt-3 text-3xl font-bold tracking-tight text-ink">Quatre portes d&apos;entrée</h2>
+      </div>
+      <p class="max-w-2xl text-sm leading-relaxed text-ink-soft">
+        J&apos;ai gardé quatre vues complémentaires: le classement global, le contemporain, les
+        formats courts et une sélection plus facile pour commencer.
+      </p>
+    </div>
+
+    <div class="notes-ranking-grid">
+      {literatureRankings.map((ranking) => (
+        <article class="notes-ranking-card">
+          <div class="flex flex-col gap-2">
+            <h3 class="text-2xl font-bold tracking-tight text-ink">{ranking.title}</h3>
+            <p class="text-sm leading-relaxed text-ink-soft">{ranking.description}</p>
+          </div>
+
+          <div class="mt-5 overflow-x-auto">
+            <table class="notes-ranking-table">
+              <thead>
+                <tr>
+                  {ranking.columns.map((column) => (
+                    <th>{column.label}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {ranking.rows.map((row) => (
+                  <tr>
+                    {ranking.columns.map((column) => (
+                      <td>{row[column.key]}</td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <section class="mt-20">
+    <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+      <div>
+        <p class="kicker">Lectures clés</p>
+        <h2 class="mt-3 text-3xl font-bold tracking-tight text-ink">
+          Ce que cette note fait ressortir
+        </h2>
+      </div>
+      <p class="max-w-2xl text-sm leading-relaxed text-ink-soft">
+        Les meilleurs livres ne sont pas toujours ceux que les IA voient le plus, et les plus
+        aimés ne sont pas toujours ceux que le canon critique sacralise.
+      </p>
+    </div>
+
+    <div class="notes-highlight-grid">
+      {literatureHighlightCards.map((card) => (
+        <article class="notes-highlight-card">
+          <h3 class="notes-highlight-title">{card.title}</h3>
+          <p class="mt-4 text-sm leading-relaxed text-ink-soft">{card.body}</p>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <section class="mt-20">
+    <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+      <div>
+        <p class="kicker">Fiches de livres</p>
+        <h2 class="mt-3 text-3xl font-bold tracking-tight text-ink">Bibliothèque commentée</h2>
+      </div>
+      <p class="max-w-2xl text-sm leading-relaxed text-ink-soft">
+        Les 16 œuvres ci-dessous rassemblent les livres distincts présents dans les classements
+        conclusifs. J&apos;ai transformé la fin du rapport en système d&apos;onglets pour éviter une
+        longue pile d&apos;images.
+      </p>
+    </div>
+
+    <div class="mt-8">
+      <BookTabs books={literatureBooks} />
+    </div>
+  </section>
+</Layout>

@@ -1,0 +1,60 @@
+<svg width="800" height="800" viewBox="0 0 800 800" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="800" fill="#F8F9FA" />
+
+  <text
+    x="400"
+    y="200"
+    fill="#1A1A1A"
+    font-family="Avenir Next, Helvetica Neue, Arial, sans-serif"
+    font-size="220"
+    font-weight="700"
+    text-anchor="middle"
+  >
+    2048
+  </text>
+
+  <rect x="120" y="220" width="560" height="560" rx="8" fill="#1A1A1A" />
+
+  <rect x="143" y="243" width="118" height="118" rx="6" fill="#F8F9FA" stroke="#1A1A1A" stroke-width="4" />
+  <rect x="275" y="243" width="118" height="118" rx="6" fill="#FFC72C" stroke="#1A1A1A" stroke-width="4" />
+  <rect x="407" y="243" width="118" height="118" rx="6" fill="#F8F9FA" stroke="#1A1A1A" stroke-width="4" />
+  <rect x="539" y="243" width="118" height="118" rx="6" fill="#FFC72C" stroke="#1A1A1A" stroke-width="4" />
+
+  <rect x="143" y="375" width="118" height="118" rx="6" fill="#D52B1E" stroke="#1A1A1A" stroke-width="4" />
+  <rect x="275" y="375" width="118" height="118" rx="6" fill="#F8F9FA" stroke="#1A1A1A" stroke-width="4" />
+  <rect x="407" y="375" width="118" height="118" rx="6" fill="#FFC72C" stroke="#1A1A1A" stroke-width="4" />
+  <rect x="539" y="375" width="118" height="118" rx="6" fill="#F8F9FA" stroke="#1A1A1A" stroke-width="4" />
+
+  <rect x="143" y="507" width="118" height="118" rx="6" fill="#F8F9FA" stroke="#1A1A1A" stroke-width="4" />
+  <rect x="275" y="507" width="118" height="118" rx="6" fill="#FFC72C" stroke="#1A1A1A" stroke-width="4" />
+  <rect x="407" y="507" width="118" height="118" rx="6" fill="#F8F9FA" stroke="#1A1A1A" stroke-width="4" />
+  <rect x="539" y="507" width="118" height="118" rx="6" fill="#F8F9FA" stroke="#1A1A1A" stroke-width="4" />
+
+  <rect x="143" y="639" width="118" height="118" rx="6" fill="#F8F9FA" stroke="#1A1A1A" stroke-width="4" />
+  <rect x="275" y="639" width="118" height="118" rx="6" fill="#F8F9FA" stroke="#1A1A1A" stroke-width="4" />
+  <rect x="407" y="639" width="118" height="118" rx="6" fill="#F8F9FA" stroke="#1A1A1A" stroke-width="4" />
+  <rect x="539" y="639" width="118" height="118" rx="6" fill="#0033A0" stroke="#1A1A1A" stroke-width="4" />
+
+  <g
+    font-family="Avenir Next, Helvetica Neue, Arial, sans-serif"
+    font-size="62"
+    font-weight="700"
+    text-anchor="middle"
+    dominant-baseline="middle"
+  >
+    <text x="202" y="302" fill="#1A1A1A">4</text>
+    <text x="334" y="302" fill="#F8F9FA">8</text>
+    <text x="466" y="302" fill="#1A1A1A">2</text>
+    <text x="598" y="302" fill="#F8F9FA">8</text>
+
+    <text x="202" y="434" fill="#F8F9FA">32</text>
+    <text x="334" y="434" fill="#1A1A1A">2</text>
+    <text x="466" y="434" fill="#F8F9FA">8</text>
+    <text x="598" y="434" fill="#1A1A1A">2</text>
+
+    <text x="202" y="566" fill="#1A1A1A">4</text>
+    <text x="334" y="566" fill="#F8F9FA">8</text>
+
+    <text x="598" y="698" fill="#F8F9FA">64</text>
+  </g>
+</svg>

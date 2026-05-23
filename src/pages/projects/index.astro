@@ -1,7 +1,7 @@
 ---
 import Layout from "../../layouts/Layout.astro";
 import { getCollection } from "astro:content";
-import { formatMonthYear } from "../../utils/content";
+import { formatMonthYear, getProjectAccentTone } from "../../utils/content";
 
 const projects = (await getCollection("projects")).sort(
   (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
@@ -39,7 +39,10 @@ function resolveThumbnail(thumbnail?: string): string | undefined {
         return (
           <a
             href={`/projects/${project.id}`}
-            class="interactive-card group overflow-hidden"
+            class:list={[
+              "interactive-card group overflow-hidden",
+              `accent-${getProjectAccentTone(project)}`,
+            ]}
           >
             <div class="flex aspect-[4/3] items-center justify-center bg-paper-subtle p-5">
               {thumbnail ? (

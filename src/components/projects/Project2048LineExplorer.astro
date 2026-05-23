@@ -147,11 +147,16 @@
       background-color 180ms ease;
   }
 
-  .project-2048-line-explorer__presets button:hover,
+  .project-2048-line-explorer__presets button:hover {
+    border-color: rgb(var(--color-line));
+    color: rgb(var(--color-paper));
+    background: rgb(var(--color-accent-deep));
+  }
+
   .project-2048-line-explorer__presets button.is-active {
-    border-color: rgb(var(--color-accent));
-    color: rgb(var(--color-accent));
-    background: rgba(var(--color-accent), 0.05);
+    border-color: rgb(var(--color-line));
+    color: rgb(var(--color-ink));
+    background: rgb(var(--color-accent-soft));
   }
 
   .project-2048-line-explorer__grid {
