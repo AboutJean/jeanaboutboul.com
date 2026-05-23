@@ -29,6 +29,43 @@ export type BookNote = {
   sourceRows: BookSourceRow[];
 };
 
+export type LiteratureOverviewStat = {
+  value: string;
+  label: string;
+};
+
+export type LiteratureSignalCard = {
+  title: string;
+  body: string;
+};
+
+export type LiteratureChart = {
+  src: string;
+  alt: string;
+  title: string;
+  caption: string;
+  insight: string;
+};
+
+export type LiteratureRankingColumn = {
+  key: string;
+  label: string;
+};
+
+export type LiteratureRankingRow = Record<string, string>;
+
+export type LiteratureRanking = {
+  title: string;
+  description: string;
+  columns: LiteratureRankingColumn[];
+  rows: LiteratureRankingRow[];
+};
+
+export type LiteratureHighlightCard = {
+  title: string;
+  body: string;
+};
+
 export const literatureBooks: BookNote[] = [
   {
     id: "l-etranger",
@@ -475,5 +512,156 @@ export const literatureBooks: BookNote[] = [
       { label: "Goodreads", value: "3,4/5", note: "Hors TOP 10 Goodreads" },
       { label: "Reddit", value: "—", note: "Hors TOP 10 Reddit" },
     ],
+  },
+];
+
+export const literatureOverviewStats: LiteratureOverviewStat[] = [
+  { value: "16", label: "oeuvres retenues" },
+  { value: "4", label: "plateformes publiques" },
+  { value: "3", label: "IA comparees" },
+  { value: "45 / 25 / 30", label: "pondération finale" },
+];
+
+export const literatureSignalCards: LiteratureSignalCard[] = [
+  {
+    title: "Consensus public",
+    body: "Le premier signal mesure la présence récurrente dans les classements lecteurs. Lorsqu'un titre revient sur SensCritique, Babelio, Goodreads et Reddit, il gagne en robustesse, même si sa note brute varie d'une plateforme à l'autre.",
+  },
+  {
+    title: "TOP 10 visibles",
+    body: "Le second signal récompense les livres qui entrent réellement dans les listes finales des plateformes. Cela évite qu'une bonne moyenne isolée domine artificiellement le classement sans vraie visibilité publique.",
+  },
+  {
+    title: "Convergence IA",
+    body: "Le troisième signal suit les œuvres qui reviennent chez Claude, ChatGPT et Gemini quand on change l'angle d'analyse: style, psychologie, philosophie, contemporains ou formats courts. Ce n'est pas une vérité, mais un bon détecteur de centralité critique.",
+  },
+];
+
+export const literatureCharts: LiteratureChart[] = [
+  {
+    src: "/notes/literature/charts/01_top10_composite.png",
+    alt: "Classement composite des dix premiers livres de littérature française.",
+    title: "TOP 10 composite",
+    caption: "Le classement consolidé mélange score public, présence dans les TOP 10 et citations IA pour faire ressortir un noyau dur plutôt qu'un simple hit-parade de notes.",
+    insight: "Camus, Hugo et Proust forment le triangle le plus stable du corpus, mais avec trois profils très différents.",
+  },
+  {
+    src: "/notes/literature/charts/02_distribution_notes.png",
+    alt: "Distribution des notes moyennes attribuées aux livres du corpus.",
+    title: "Distribution des notes",
+    caption: "Les notes publiques sont tassées vers le haut: beaucoup de titres sont déjà fortement sélectionnés, donc les écarts de moyenne restent relativement faibles.",
+    insight: "Le différentiel se joue moins sur la note brute que sur la répétition d'un même titre à travers plusieurs sources.",
+  },
+  {
+    src: "/notes/literature/charts/03_scatter_ai_notes.png",
+    alt: "Nuage de points croisant visibilité IA et appréciation publique.",
+    title: "Visibilité IA vs note publique",
+    caption: "Le nuage montre quels livres sont particulièrement aimés des IA, lesquels relèvent surtout du canon public, et où se trouve le vrai consensus.",
+    insight: "Madame Bovary et Proust sont surpondérés par l'analyse IA, tandis que Monte-Cristo domine surtout par l'adhésion populaire.",
+  },
+  {
+    src: "/notes/literature/charts/04_heatmap_top10_categories.png",
+    alt: "Carte de chaleur des catégories et des apparitions dans les top 10.",
+    title: "Heatmap des catégories",
+    caption: "Cette vue rend visible la densité de présence par angle d'analyse: général, style, psychologie, philosophie, courts et contemporain.",
+    insight: "Quelques titres rayonnent partout, mais la plupart gagnent surtout par spécialisation.",
+  },
+  {
+    src: "/notes/literature/charts/05_repartition_temporelle.png",
+    alt: "Répartition temporelle des livres retenus dans le corpus.",
+    title: "Répartition temporelle",
+    caption: "Le corpus reste massivement attiré par le XIXe siècle et le premier XXe, avec une ouverture plus sélective vers le contemporain.",
+    insight: "L'inertie historique est forte: les œuvres récentes percent, mais rarement sans une légitimation publique déjà très solide.",
+  },
+];
+
+export const literatureRankings: LiteratureRanking[] = [
+  {
+    title: "Tableau consolidé",
+    description: "Lecture d'ensemble: score composite, présence transversale et équilibre entre popularité publique et reconnaissance critique.",
+    columns: [
+      { key: "rank", label: "#" },
+      { key: "title", label: "Titre" },
+      { key: "author", label: "Auteur" },
+      { key: "signal", label: "Signal fort" },
+    ],
+    rows: [
+      { rank: "1", title: "L'Étranger", author: "Albert Camus", signal: "Consensus total" },
+      { rank: "2", title: "Les Misérables", author: "Victor Hugo", signal: "Canon public massif" },
+      { rank: "3", title: "À la recherche du temps perdu", author: "Marcel Proust", signal: "Convergence IA record" },
+      { rank: "4", title: "Le Comte de Monte-Cristo", author: "Alexandre Dumas", signal: "Adhésion populaire" },
+      { rank: "5", title: "Voyage au bout de la nuit", author: "Louis-Ferdinand Céline", signal: "Force stylistique" },
+      { rank: "6", title: "Le Petit Prince", author: "Antoine de Saint-Exupéry", signal: "Court et universel" },
+      { rank: "7", title: "Madame Bovary", author: "Gustave Flaubert", signal: "Précision technique" },
+      { rank: "8", title: "Cyrano de Bergerac", author: "Edmond Rostand", signal: "Note publique très haute" },
+      { rank: "9", title: "Au revoir là-haut", author: "Pierre Lemaitre", signal: "Contemporain le plus stable" },
+      { rank: "10", title: "La Promesse de l'aube", author: "Romain Gary", signal: "Entrée accessible" },
+    ],
+  },
+  {
+    title: "Contemporain",
+    description: "Une porte d'entrée pour le XXe tardif et le XXIe siècle, sans renoncer à l'exigence littéraire.",
+    columns: [
+      { key: "rank", label: "#" },
+      { key: "title", label: "Titre" },
+      { key: "author", label: "Auteur" },
+      { key: "why", label: "Pourquoi ici" },
+    ],
+    rows: [
+      { rank: "1", title: "Au revoir là-haut", author: "Pierre Lemaitre", why: "Meilleur contemporain du corpus" },
+      { rank: "2", title: "La Promesse de l'aube", author: "Romain Gary", why: "Émotion et limpidité" },
+      { rank: "3", title: "La Horde du contrevent", author: "Alain Damasio", why: "Objet formel singulier" },
+      { rank: "4", title: "Changer l'eau des fleurs", author: "Valérie Perrin", why: "Grand succès lecteur" },
+      { rank: "5", title: "Mémoires d'Hadrien", author: "Marguerite Yourcenar", why: "Sommet de prose méditative" },
+    ],
+  },
+  {
+    title: "Formats courts",
+    description: "Des œuvres plus brèves qui gardent une vraie densité littéraire et une forte valeur d'entrée.",
+    columns: [
+      { key: "rank", label: "#" },
+      { key: "title", label: "Titre" },
+      { key: "author", label: "Auteur" },
+      { key: "why", label: "Pourquoi ici" },
+    ],
+    rows: [
+      { rank: "1", title: "L'Étranger", author: "Albert Camus", why: "Court, central, décisif" },
+      { rank: "2", title: "Le Petit Prince", author: "Antoine de Saint-Exupéry", why: "Universel et limpide" },
+      { rank: "3", title: "Candide", author: "Voltaire", why: "Satire parfaite" },
+      { rank: "4", title: "La Nausée", author: "Jean-Paul Sartre", why: "Existentialisme en concentré" },
+      { rank: "5", title: "La Princesse de Clèves", author: "Madame de La Fayette", why: "Psychologie fondatrice" },
+    ],
+  },
+  {
+    title: "Pour commencer",
+    description: "Sélection la plus lisible pour entrer dans la littérature française sans commencer par les textes les plus intimidants.",
+    columns: [
+      { key: "rank", label: "#" },
+      { key: "title", label: "Titre" },
+      { key: "author", label: "Auteur" },
+      { key: "why", label: "Pourquoi ici" },
+    ],
+    rows: [
+      { rank: "1", title: "Le Comte de Monte-Cristo", author: "Alexandre Dumas", why: "Addictif immédiatement" },
+      { rank: "2", title: "L'Étranger", author: "Albert Camus", why: "Court et fondamental" },
+      { rank: "3", title: "Le Petit Prince", author: "Antoine de Saint-Exupéry", why: "Accessible à tous" },
+      { rank: "4", title: "Cyrano de Bergerac", author: "Edmond Rostand", why: "Panache et plaisir" },
+      { rank: "5", title: "La Promesse de l'aube", author: "Romain Gary", why: "Émotion sans lourdeur" },
+    ],
+  },
+];
+
+export const literatureHighlightCards: LiteratureHighlightCard[] = [
+  {
+    title: "Le public et les IA ne racontent pas exactement la même histoire",
+    body: "Les plateformes mettent très haut les récits immédiatement aimés et relus, tandis que les IA survalorisent les monuments techniques ou philosophiques. Le croisement des deux évite les angles morts de chaque camp.",
+  },
+  {
+    title: "Le XIXe siècle reste la colonne vertébrale du canon",
+    body: "Hugo, Dumas, Flaubert, Rostand ou Baudelaire continuent d'aimanter les listes. Le contemporain existe, mais il gagne surtout lorsqu'il combine lisibilité, prix, et forte circulation publique.",
+  },
+  {
+    title: "L'accessibilité n'est pas l'ennemie de l'exigence",
+    body: "Monte-Cristo, Le Petit Prince ou La Promesse de l'aube montrent qu'une oeuvre peut être très lisible, populaire et pourtant digne d'une vraie place dans un parcours littéraire sérieux.",
   },
 ];
