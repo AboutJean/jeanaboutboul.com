@@ -1,0 +1,342 @@
+<div class="not-prose satellite-lab surface-card" data-satellite-lab>
+  <div class="satellite-lab__header">
+    <div>
+      <p class="kicker">Mini labo</p>
+      <h3>Mini simulation du pointage</h3>
+    </div>
+    <p>
+      Ce petit labo reprend deux idées du projet : le <code>Go To</code>
+      choisit toujours le chemin azimutal le plus court modulo 360 degrés, puis
+      ajuste l&apos;élévation via le PWM du servo.
+    </p>
+  </div>
+
+  <div class="satellite-lab__grid">
+    <div class="satellite-lab__controls">
+      <label class="satellite-lab__control">
+        <span>Azimut courant</span>
+        <strong data-output="current-az-value">42°</strong>
+        <input type="range" min="0" max="359" value="42" data-field="current-az" />
+      </label>
+
+      <label class="satellite-lab__control">
+        <span>Azimut cible</span>
+        <strong data-output="target-az-value">310°</strong>
+        <input type="range" min="0" max="359" value="310" data-field="target-az" />
+      </label>
+
+      <label class="satellite-lab__control">
+        <span>Élévation courante</span>
+        <strong data-output="current-el-value">24°</strong>
+        <input type="range" min="0" max="90" value="24" data-field="current-el" />
+      </label>
+
+      <label class="satellite-lab__control">
+        <span>Élévation cible</span>
+        <strong data-output="target-el-value">56°</strong>
+        <input type="range" min="0" max="90" value="56" data-field="target-el" />
+      </label>
+    </div>
+
+    <div class="satellite-lab__analysis">
+      <div class="satellite-lab__stats">
+        <article class="satellite-lab__stat">
+          <span>Delta azimutal</span>
+          <strong data-output="shortest-delta">-92°</strong>
+        </article>
+        <article class="satellite-lab__stat">
+          <span>Pas partiels X27</span>
+          <strong data-output="partial-steps">276</strong>
+        </article>
+        <article class="satellite-lab__stat">
+          <span>PWM servo cible</span>
+          <strong data-output="target-pwm">749 ticks</strong>
+        </article>
+        <article class="satellite-lab__stat">
+          <span>Fenêtre SCAN</span>
+          <strong data-output="scan-band">14°-34°</strong>
+        </article>
+      </div>
+
+      <div class="satellite-lab__sequence">
+        <article class="satellite-lab__step is-accent">
+          <span>1</span>
+          <div>
+            <h4>Rotation la plus courte</h4>
+            <p data-output="az-plan">
+              Diminuer l&apos;azimut de 92°, soit 276 pas partiels.
+            </p>
+          </div>
+        </article>
+
+        <article class="satellite-lab__step">
+          <span>2</span>
+          <div>
+            <h4>Élévation par PWM</h4>
+            <p data-output="el-plan">
+              Appliquer 56° sur le servo, soit environ 1.50 ms.
+            </p>
+          </div>
+        </article>
+      </div>
+
+      <div class="satellite-lab__tiers">
+        <span>tap: 1° / répétition</span>
+        <span>maintien ~1.1 s: 5° / répétition</span>
+        <span>maintien ~3.4 s: 10° / répétition</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script is:inline>
+  function initSatelliteLab(root) {
+    const fields = {
+      currentAz: root.querySelector('[data-field="current-az"]'),
+      targetAz: root.querySelector('[data-field="target-az"]'),
+      currentEl: root.querySelector('[data-field="current-el"]'),
+      targetEl: root.querySelector('[data-field="target-el"]'),
+    };
+
+    const outputs = {
+      currentAzValue: root.querySelector('[data-output="current-az-value"]'),
+      targetAzValue: root.querySelector('[data-output="target-az-value"]'),
+      currentElValue: root.querySelector('[data-output="current-el-value"]'),
+      targetElValue: root.querySelector('[data-output="target-el-value"]'),
+      shortestDelta: root.querySelector('[data-output="shortest-delta"]'),
+      partialSteps: root.querySelector('[data-output="partial-steps"]'),
+      targetPwm: root.querySelector('[data-output="target-pwm"]'),
+      scanBand: root.querySelector('[data-output="scan-band"]'),
+      azPlan: root.querySelector('[data-output="az-plan"]'),
+      elPlan: root.querySelector('[data-output="el-plan"]'),
+    };
+
+    function shortestDelta(currentAz, targetAz) {
+      let delta = targetAz - currentAz;
+      if (delta > 180) delta -= 360;
+      if (delta < -180) delta += 360;
+      return delta;
+    }
+
+    function formatDeg(value) {
+      return `${value}°`;
+    }
+
+    function update() {
+      const currentAz = Number(fields.currentAz.value);
+      const targetAz = Number(fields.targetAz.value);
+      const currentEl = Number(fields.currentEl.value);
+      const targetEl = Number(fields.targetEl.value);
+
+      const delta = shortestDelta(currentAz, targetAz);
+      const partialSteps = Math.abs(delta) * 3;
+      const targetPwm = Math.round(500 + (targetEl * 400) / 90);
+      const pulseWidthMs = (targetPwm * 2 / 1000).toFixed(2);
+      const scanMin = Math.max(0, currentEl - 10);
+      const scanMax = Math.min(90, currentEl + 10);
+
+      outputs.currentAzValue.textContent = formatDeg(currentAz);
+      outputs.targetAzValue.textContent = formatDeg(targetAz);
+      outputs.currentElValue.textContent = formatDeg(currentEl);
+      outputs.targetElValue.textContent = formatDeg(targetEl);
+      outputs.shortestDelta.textContent = `${delta >= 0 ? "+" : ""}${delta}°`;
+      outputs.partialSteps.textContent = `${partialSteps}`;
+      outputs.targetPwm.textContent = `${targetPwm} ticks`;
+      outputs.scanBand.textContent = `${scanMin}°-${scanMax}°`;
+
+      if (delta === 0) {
+        outputs.azPlan.textContent = "Azimut déjà aligné : aucun déplacement requis avant le servo.";
+      } else {
+        const verb = delta > 0 ? "Augmenter" : "Diminuer";
+        outputs.azPlan.textContent =
+          `${verb} l'azimut de ${Math.abs(delta)}°, soit ${partialSteps} pas partiels.`;
+      }
+
+      outputs.elPlan.textContent =
+        `Appliquer ${targetEl}° sur le servo, soit environ ${pulseWidthMs} ms de largeur d'impulsion.`;
+    }
+
+    Object.values(fields).forEach((field) => {
+      field.addEventListener("input", update);
+    });
+
+    update();
+  }
+
+  document.querySelectorAll("[data-satellite-lab]").forEach(initSatelliteLab);
+</script>
+
+<style>
+  .satellite-lab {
+    padding: 1.25rem;
+  }
+
+  .satellite-lab__header {
+    display: grid;
+    gap: 0.9rem;
+  }
+
+  .satellite-lab__header h3 {
+    margin: 0.45rem 0 0;
+    font-size: clamp(1.45rem, 2.4vw, 2rem);
+    line-height: 1.15;
+    color: rgb(var(--color-ink));
+  }
+
+  .satellite-lab__header p:last-child {
+    margin: 0;
+    max-width: 58rem;
+    line-height: 1.65;
+    color: rgb(var(--color-ink-soft));
+  }
+
+  .satellite-lab__grid {
+    display: grid;
+    gap: 1rem;
+    margin-top: 1.2rem;
+  }
+
+  .satellite-lab__controls,
+  .satellite-lab__analysis {
+    border: 1px solid rgb(var(--color-line-strong));
+    background: rgb(var(--color-paper));
+    padding: 1rem;
+  }
+
+  .satellite-lab__controls {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .satellite-lab__control {
+    display: grid;
+    gap: 0.45rem;
+  }
+
+  .satellite-lab__control span {
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgb(var(--color-ink-faint));
+  }
+
+  .satellite-lab__control strong,
+  .satellite-lab__stat strong {
+    font-size: 1.25rem;
+    line-height: 1.1;
+    color: rgb(var(--color-ink));
+  }
+
+  .satellite-lab__control input {
+    width: 100%;
+    accent-color: rgb(var(--color-accent));
+  }
+
+  .satellite-lab__analysis {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .satellite-lab__stats {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .satellite-lab__stat {
+    border: 1px solid rgb(var(--color-line));
+    background: rgb(var(--color-paper-raised));
+    padding: 0.9rem;
+  }
+
+  .satellite-lab__stat span {
+    display: block;
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgb(var(--color-ink-faint));
+  }
+
+  .satellite-lab__stat strong {
+    display: block;
+    margin-top: 0.45rem;
+  }
+
+  .satellite-lab__sequence {
+    display: grid;
+    gap: 0.8rem;
+  }
+
+  .satellite-lab__step {
+    display: grid;
+    grid-template-columns: 2.5rem minmax(0, 1fr);
+    gap: 0.9rem;
+    align-items: start;
+    border: 1px solid rgb(var(--color-line));
+    background: rgb(var(--color-paper-raised));
+    padding: 0.95rem;
+  }
+
+  .satellite-lab__step.is-accent {
+    background: rgb(var(--color-accent-soft));
+  }
+
+  .satellite-lab__step span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border: 1px solid rgb(var(--color-line-strong));
+    background: rgb(var(--color-paper));
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    font-size: 0.85rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    color: rgb(var(--color-accent-deep));
+  }
+
+  .satellite-lab__step h4 {
+    margin: 0;
+    font-size: 1rem;
+    line-height: 1.2;
+    color: rgb(var(--color-ink));
+  }
+
+  .satellite-lab__step p {
+    margin: 0.45rem 0 0;
+    line-height: 1.6;
+    color: rgb(var(--color-ink-soft));
+  }
+
+  .satellite-lab__tiers {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+  }
+
+  .satellite-lab__tiers span {
+    border: 1px solid rgb(var(--color-line));
+    background: rgb(var(--color-paper-raised));
+    padding: 0.42rem 0.62rem;
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgb(var(--color-ink-faint));
+  }
+
+  @media (min-width: 980px) {
+    .satellite-lab__grid {
+      grid-template-columns: minmax(18rem, 21rem) minmax(0, 1fr);
+    }
+
+    .satellite-lab__stats {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+</style>

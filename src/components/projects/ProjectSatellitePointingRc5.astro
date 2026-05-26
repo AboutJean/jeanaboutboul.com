@@ -1,0 +1,114 @@
+<figure class="not-prose satellite-rc5 surface-card" aria-labelledby="satellite-rc5-title">
+  <figcaption>
+    <p class="kicker">Trame RC5</p>
+    <h3 id="satellite-rc5-title">14 bits Manchester, capturés sans périphérique dédié</h3>
+    <p>
+      Le démodulateur TSOP réveille <code>INT7</code>. L'ISR attend ensuite le
+      centre de chaque bit et échantillonne <code>PE7</code>.
+    </p>
+  </figcaption>
+
+  <div class="satellite-rc5__frame" aria-label="RC5 frame layout">
+    <span style="--span: 1">S1<small>1 bit</small></span>
+    <span style="--span: 1">S2<small>1 bit</small></span>
+    <span style="--span: 1">Toggle<small>1 bit</small></span>
+    <span style="--span: 5">Adresse<small>5 bits</small></span>
+    <span style="--span: 6">Commande<small>6 bits</small></span>
+  </div>
+
+  <div class="satellite-rc5__logic">
+    <article>
+      <strong>0 logique</strong>
+      <span>transition <code>HIGH → LOW</code> au milieu du bit</span>
+    </article>
+    <article>
+      <strong>1 logique</strong>
+      <span>transition <code>LOW → HIGH</code> au milieu du bit</span>
+    </article>
+    <article>
+      <strong>Timing</strong>
+      <span><code>T1 ≈ 1870 µs</code>, calibré pour l'oscillateur 4 MHz</span>
+    </article>
+  </div>
+</figure>
+
+<style>
+  .satellite-rc5 {
+    padding: 1.25rem;
+  }
+
+  .satellite-rc5 h3 {
+    margin: 0.45rem 0 0;
+    font-size: clamp(1.45rem, 2.4vw, 2rem);
+    line-height: 1.15;
+    color: rgb(var(--color-ink));
+  }
+
+  .satellite-rc5 figcaption > p:last-child {
+    margin: 0.8rem 0 0;
+    max-width: 58rem;
+    line-height: 1.65;
+    color: rgb(var(--color-ink-soft));
+  }
+
+  .satellite-rc5__frame {
+    display: grid;
+    grid-template-columns: repeat(14, minmax(1.4rem, 1fr));
+    gap: 0.25rem;
+    margin-top: 1.1rem;
+    overflow-x: auto;
+  }
+
+  .satellite-rc5__frame span {
+    grid-column: span var(--span);
+    display: grid;
+    min-width: calc(var(--span) * 3.3rem);
+    place-items: center;
+    border: 1px solid rgb(var(--color-line-strong));
+    background: rgb(var(--color-paper));
+    padding: 0.8rem 0.55rem;
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    font-size: 0.8rem;
+    font-weight: 900;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgb(var(--color-ink));
+  }
+
+  .satellite-rc5__frame small {
+    display: block;
+    margin-top: 0.24rem;
+    font-size: 0.62rem;
+    color: rgb(var(--color-ink-faint));
+  }
+
+  .satellite-rc5__logic {
+    display: grid;
+    gap: 0.75rem;
+    margin-top: 0.9rem;
+  }
+
+  .satellite-rc5__logic article {
+    border: 1px solid rgb(var(--color-line));
+    background: rgb(var(--color-paper-raised));
+    padding: 0.9rem;
+  }
+
+  .satellite-rc5__logic strong {
+    display: block;
+    color: rgb(var(--color-ink));
+  }
+
+  .satellite-rc5__logic span {
+    display: block;
+    margin-top: 0.35rem;
+    line-height: 1.55;
+    color: rgb(var(--color-ink-soft));
+  }
+
+  @media (min-width: 860px) {
+    .satellite-rc5__logic {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+</style>

@@ -1,0 +1,187 @@
+<figure class="not-prose satellite-hardware surface-card" aria-labelledby="satellite-hardware-title">
+  <figcaption class="satellite-hardware__header">
+    <p class="kicker">Architecture matérielle</p>
+    <h3 id="satellite-hardware-title">STK-300 au centre, périphériques autour</h3>
+    <p>
+      Le montage garde l'ATmega128L comme point de convergence : entrées RC5 et
+      UART d'un côté, actionneurs, LCD et buzzer de l'autre.
+    </p>
+  </figcaption>
+
+  <div class="satellite-hardware__diagram" aria-label="Hardware connection diagram">
+    <section class="satellite-hardware__zone satellite-hardware__zone--inputs">
+      <h4>Entrées</h4>
+      <article>
+        <strong>IR Demod TSOP</strong>
+        <span>RC5 sur PE7 / INT7</span>
+      </article>
+      <article>
+        <strong>Terminal PC</strong>
+        <span>UART USB 19 200 Bd</span>
+      </article>
+    </section>
+
+    <div class="satellite-hardware__bus satellite-hardware__bus--left">
+      <span>événements</span>
+    </div>
+
+    <section class="satellite-hardware__mcu">
+      <span>STK-300</span>
+      <strong>ATmega128L</strong>
+      <small>4 MHz · assembleur AVR</small>
+    </section>
+
+    <div class="satellite-hardware__bus satellite-hardware__bus--right">
+      <span>signaux</span>
+    </div>
+
+    <section class="satellite-hardware__zone satellite-hardware__zone--outputs">
+      <h4>Actionneurs et affichage</h4>
+      <article>
+        <strong>LCD HD44780</strong>
+        <span>Bus XMEM 0x8000 / 0xC000</span>
+      </article>
+      <article>
+        <strong>Servo S3003</strong>
+        <span>PWM Timer1, 50 Hz</span>
+      </article>
+      <article>
+        <strong>Stepper X27</strong>
+        <span>PORTD[0:3], demi-pas</span>
+      </article>
+      <article>
+        <strong>Buzzer piézo</strong>
+        <span>Bit-bang sur PE2</span>
+      </article>
+    </section>
+  </div>
+</figure>
+
+<style>
+  .satellite-hardware {
+    padding: 1.25rem;
+  }
+
+  .satellite-hardware__header h3 {
+    margin: 0.45rem 0 0;
+    font-size: clamp(1.45rem, 2.4vw, 2rem);
+    line-height: 1.15;
+    color: rgb(var(--color-ink));
+  }
+
+  .satellite-hardware__header p:last-child {
+    margin: 0.8rem 0 0;
+    max-width: 58rem;
+    line-height: 1.65;
+    color: rgb(var(--color-ink-soft));
+  }
+
+  .satellite-hardware__diagram {
+    display: grid;
+    gap: 0.9rem;
+    margin-top: 1.2rem;
+    align-items: center;
+  }
+
+  .satellite-hardware__zone,
+  .satellite-hardware__mcu {
+    border: 1px solid rgb(var(--color-line-strong));
+    background: rgb(var(--color-paper));
+  }
+
+  .satellite-hardware__zone {
+    display: grid;
+    gap: 0.65rem;
+    padding: 1rem;
+  }
+
+  .satellite-hardware__zone h4 {
+    margin: 0 0 0.1rem;
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgb(var(--color-ink-faint));
+  }
+
+  .satellite-hardware__zone article {
+    border: 1px solid rgb(var(--color-line));
+    background: rgb(var(--color-paper-raised));
+    padding: 0.82rem;
+  }
+
+  .satellite-hardware__zone strong,
+  .satellite-hardware__mcu strong {
+    display: block;
+    color: rgb(var(--color-ink));
+  }
+
+  .satellite-hardware__zone span,
+  .satellite-hardware__mcu small,
+  .satellite-hardware__mcu span {
+    display: block;
+    margin-top: 0.25rem;
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+    color: rgb(var(--color-ink-faint));
+  }
+
+  .satellite-hardware__mcu {
+    display: grid;
+    min-height: 8rem;
+    place-items: center;
+    padding: 1.35rem;
+    text-align: center;
+    background:
+      radial-gradient(circle at 20% 20%, rgba(var(--color-accent), 0.2), transparent 32%),
+      linear-gradient(145deg, rgba(var(--color-accent-soft), 0.65), rgb(var(--color-paper)) 68%);
+  }
+
+  .satellite-hardware__mcu strong {
+    margin-top: 0.35rem;
+    font-size: clamp(1.75rem, 4vw, 2.6rem);
+    line-height: 1;
+  }
+
+  .satellite-hardware__bus {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.2rem;
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    font-size: 0.66rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgb(var(--color-accent-deep));
+  }
+
+  .satellite-hardware__bus::before,
+  .satellite-hardware__bus::after {
+    content: "";
+    display: block;
+    flex: 1;
+    height: 1px;
+    background: rgb(var(--color-line-strong));
+  }
+
+  .satellite-hardware__bus span {
+    border: 1px solid rgb(var(--color-line));
+    background: rgb(var(--color-paper-raised));
+    padding: 0.28rem 0.5rem;
+  }
+
+  @media (min-width: 760px) {
+    .satellite-hardware__zone {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .satellite-hardware__zone h4 {
+      grid-column: 1 / -1;
+    }
+  }
+</style>

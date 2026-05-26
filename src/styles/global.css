@@ -511,8 +511,72 @@
   }
 
   pre {
-    @apply overflow-x-auto border border-line bg-line px-4 py-4 text-[0.92rem];
+    @apply relative overflow-x-auto border border-line px-4 pb-4 pt-10 text-[0.9rem];
+    background:
+      linear-gradient(90deg, rgb(var(--color-accent)) 0 16%, rgb(var(--color-accent-deep)) 16% 30%, rgb(var(--color-accent-soft)) 30% 52%, transparent 52%),
+      linear-gradient(180deg, rgba(var(--color-paper-contrast), 0.08), transparent 3rem),
+      rgb(var(--color-line)) !important;
+    background-size: 13rem 0.34rem, auto, auto;
+    background-position: 1rem 0.95rem, 0 0, 0 0;
+    background-repeat: no-repeat;
     color: rgb(var(--color-paper-contrast));
+    box-shadow: inset 0 0 0 1px rgba(var(--color-paper), 0.12);
+  }
+
+  pre::before {
+    content: "source";
+    position: absolute;
+    top: 0.65rem;
+    right: 0.85rem;
+    border: 1px solid rgba(var(--color-paper-contrast), 0.45);
+    padding: 0.18rem 0.42rem;
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    font-size: 0.58rem;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    line-height: 1;
+    text-transform: uppercase;
+    color: rgba(var(--color-paper-contrast), 0.78);
+  }
+
+  pre::after {
+    content: "";
+    position: absolute;
+    top: 0.95rem;
+    left: 1rem;
+    width: 13rem;
+    height: 0.34rem;
+    background: linear-gradient(
+      90deg,
+      rgb(var(--color-accent)) 0 16%,
+      rgb(var(--color-accent-deep)) 16% 30%,
+      rgb(var(--color-accent-soft)) 30% 52%,
+      transparent 52%
+    );
+    pointer-events: none;
+  }
+
+  pre code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: inherit;
+    line-height: 1.75;
+  }
+
+  .prose pre.astro-code,
+  .prose pre {
+    position: relative;
+    overflow-x: auto;
+    border: 1px solid rgb(var(--color-line));
+    padding: 2.55rem 1rem 1rem !important;
+    background-color: rgb(var(--color-line)) !important;
+    background-image:
+      linear-gradient(90deg, rgb(var(--color-accent)) 0 16%, rgb(var(--color-accent-deep)) 16% 30%, rgb(var(--color-accent-soft)) 30% 52%, transparent 52%),
+      linear-gradient(180deg, rgba(var(--color-paper-contrast), 0.08), transparent 3rem) !important;
+    background-size: 13rem 0.34rem, auto !important;
+    background-position: 1rem 0.95rem, 0 0 !important;
+    background-repeat: no-repeat !important;
+    color: rgb(var(--color-paper-contrast)) !important;
+    box-shadow: inset 0 0 0 1px rgba(var(--color-paper), 0.12);
   }
 
   :not(pre) > code {

@@ -1,0 +1,1243 @@
+---
+title: "Station de pointage d'antenne satellitaire"
+summary: "Projet MICRO-210 EPFL en assembleur AVR : une station embarquée temps réel sur ATmega128L qui pilote un stepper d'azimut, un servo d'élévation, une télécommande RC5, une base EEPROM, un LCD et un mode SCAN 360°."
+date: 2026-05-26
+thumbnail: "/projects/station-pointage-satellites/images/thumbnail.jpg"
+tags: ["microcontrollers", "avr-assembly", "embedded-systems", "epfl", "robotics", "uart", "eeprom", "state-machines"]
+status: "completed"
+featured: true
+---
+
+import PdfViewer from "../../components/notes/PdfViewer.astro";
+import ProjectSatellitePointingArchitecture from "../../components/projects/ProjectSatellitePointingArchitecture.astro";
+import ProjectSatellitePointingFsm from "../../components/projects/ProjectSatellitePointingFsm.astro";
+import ProjectSatellitePointingHardware from "../../components/projects/ProjectSatellitePointingHardware.astro";
+import ProjectSatellitePointingLab from "../../components/projects/ProjectSatellitePointingLab.astro";
+import ProjectSatellitePointingLcdMock from "../../components/projects/ProjectSatellitePointingLcdMock.astro";
+import ProjectSatellitePointingMemory from "../../components/projects/ProjectSatellitePointingMemory.astro";
+import ProjectSatellitePointingOverlayFlow from "../../components/projects/ProjectSatellitePointingOverlayFlow.astro";
+import ProjectSatellitePointingRc5 from "../../components/projects/ProjectSatellitePointingRc5.astro";
+import ProjectSatellitePointingScanFlow from "../../components/projects/ProjectSatellitePointingScanFlow.astro";
+import ProjectSatellitePointingSoftwareLayers from "../../components/projects/ProjectSatellitePointingSoftwareLayers.astro";
+import ProjectSatellitePointingSimulator from "../../components/projects/ProjectSatellitePointingSimulator.astro";
+import ProjectSatellitePointingTiming from "../../components/projects/ProjectSatellitePointingTiming.astro";
+
+## Résumé
+
+**Station de pointage d'antenne satellitaire** est un projet de microcontrôleurs
+réalisé à l'EPFL au printemps 2026 dans le cadre du cours **MICRO-210**. Le
+but était de construire, à l'échelle d'un microcontrôleur 8 bits, une station
+capable de pointer une antenne miniature vers des satellites stockés en mémoire.
+
+Le système tourne sur une carte **STK-300** avec un **ATmega128L à 4 MHz**. Il
+pilote un moteur pas-à-pas **X27.168** pour l'azimut, un servomoteur **Futaba
+S3003** pour l'élévation, un écran **LCD HD44780 2×16**, une télécommande
+infrarouge **RC5**, un buzzer piézoélectrique, une liaison **UART à 19 200
+bauds** et une base satellites persistante en **EEPROM**.
+
+La contrainte qui rend le projet vraiment intéressant : tout est écrit en
+**assembleur AVR**, sans ligne de C. Chaque timer, interruption, registre,
+flag, bit d'EEPROM et cycle d'attente est manipulé explicitement.
+
+Projet réalisé avec **Lars Clausen**.
+
+Dépôt GitHub :
+[AboutJean/MCU-station-pointage-de-sattelites](https://github.com/AboutJean/MCU-station-pointage-de-sattelites)
+
+<div class="not-prose my-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+  <article class="surface-card p-5">
+    <p class="kicker">Cours</p>
+    <h3 class="mt-3 text-xl font-bold tracking-tight text-ink">MICRO-210 · EPFL</h3>
+    <p class="mt-3 text-sm leading-relaxed text-ink-soft">
+      Projet MCU2026-G111, groupe 111, section Génie microtechnique.
+    </p>
+  </article>
+
+  <article class="surface-card p-5">
+    <p class="kicker">Matériel</p>
+    <h3 class="mt-3 text-xl font-bold tracking-tight text-ink">ATmega128L + STK-300</h3>
+    <p class="mt-3 text-sm leading-relaxed text-ink-soft">
+      Stepper X27 pour l'azimut, servo S3003 pour l'élévation.
+    </p>
+  </article>
+
+  <article class="surface-card p-5">
+    <p class="kicker">Modes</p>
+    <h3 class="mt-3 text-xl font-bold tracking-tight text-ink">MANUEL · AUTO · SCAN</h3>
+    <p class="mt-3 text-sm leading-relaxed text-ink-soft">
+      Pilotage direct, Go-To depuis l'EEPROM et balayage complet du ciel.
+    </p>
+  </article>
+
+  <article class="surface-card p-5">
+    <p class="kicker">Code</p>
+    <h3 class="mt-3 text-xl font-bold tracking-tight text-ink">~5 762 lignes AVR</h3>
+    <p class="mt-3 text-sm leading-relaxed text-ink-soft">
+      20 fichiers, architecture drivers/libs, FSM et routines temps réel.
+    </p>
+  </article>
+</div>
+
+<ProjectSatellitePointingSimulator />
+
+<div class="not-prose my-8">
+  <figure class="border border-line bg-paper-raised p-4">
+    <img
+      src="/projects/station-pointage-satellites/images/thumbnail.jpg"
+      alt="Montage STK-300 avec télécommande RC5, stepper X27, servo Futaba S3003 et LCD 2x16."
+      class="mx-auto w-full max-w-2xl border border-line bg-paper"
+    />
+    <figcaption class="mt-3 font-sans text-[0.72rem] uppercase tracking-[0.14em] text-ink-faint">
+      Prototype physique : carte STK-300, modules EPFL, télécommande RC5, stepper d'azimut et LCD.
+    </figcaption>
+  </figure>
+</div>
+
+## 1. Introduction
+
+### 1.1 Contexte et inspiration
+
+Le réseau **ESTRACK** de l'ESA utilise des antennes paraboliques réparties sur
+le globe pour communiquer avec des satellites. Chaque antenne doit pointer vers
+une cible en orbite avec une précision de l'ordre du dixième de degré, en
+contrôlant deux axes :
+
+- l'**azimut**, rotation horizontale sur 0°–360° ;
+- l'**élévation**, inclinaison verticale sur 0°–90°.
+
+Notre projet reprend ce concept en version miniature : une station de pointage
+capable de stocker des satellites, de s'orienter automatiquement vers eux, ou de
+balayer le ciel pour retrouver ceux qui correspondent à l'élévation courante.
+
+Le choix de l'assembleur n'était pas du masochisme, même si le Git log suggère
+parfois le contraire. C'était le cœur pédagogique du projet : programmer en AVR
+force à comprendre exactement ce que fait le processeur à chaque cycle
+d'horloge. Chaque bit de chaque registre a une signification, et aucune
+abstraction ne vient masquer le matériel.
+
+### 1.2 Ce que fait le système
+
+La station sait faire trois choses :
+
+1. **Pointer manuellement** : l'utilisateur contrôle l'azimut et l'élévation à
+   la télécommande, comme avec un joystick.
+2. **Pointer automatiquement** : l'utilisateur choisit un satellite dans une
+   base de 32 slots EEPROM, puis l'antenne s'y déplace seule par le chemin
+   azimutal le plus court.
+3. **Scanner le ciel** : l'antenne effectue une rotation complète de 360° et
+   détecte les satellites visibles depuis l'élévation actuelle.
+
+### 1.3 En un coup d'œil
+
+| Caractéristique | Détail |
+|---|---|
+| MCU | ATmega128L à 4 MHz, oscillateur RC interne |
+| Carte | STK-300 EPFL |
+| Axe azimut | Moteur pas-à-pas X27.168, 1/3° par pas, 360° continu |
+| Axe élévation | Servomoteur Futaba S3003, PWM 50 Hz, 0°–90° |
+| Interface | Télécommande IR Vivanco UR Z2, protocole RC5 |
+| Affichage | LCD HD44780 2×16, memory-mapped |
+| Communication | UART 19 200 bauds, miroir et injection de commandes |
+| Stockage | EEPROM interne, 32 slots × 16 octets |
+| Code | ~5 762 lignes d'assembleur AVR, 20 fichiers |
+| Langage | 100% assembleur AVR |
+
+## 2. Architecture matérielle
+
+### 2.1 Vue d'ensemble du montage
+
+Le système est construit autour de la **STK-300**. L'ATmega128L reçoit les
+commandes IR ou UART, met à jour sa machine à états, puis pilote les actionneurs
+et les retours utilisateur.
+
+<ProjectSatellitePointingHardware />
+
+<ProjectSatellitePointingArchitecture />
+
+### 2.2 L'ATmega128L, le cerveau
+
+L'ATmega128L est un microcontrôleur AVR 8 bits à architecture Harvard, avec
+mémoire programme et mémoire données séparées.
+
+| Ressource | Capacité | Utilisation dans le projet |
+|---|---:|---|
+| Flash | 128 Ko | Code, tables, chaînes, environ 8 Ko utilisés |
+| SRAM | 4 Ko | Variables FSM, buffers, cache SCAN |
+| EEPROM | 4 Ko | Base de données satellites, 512 octets utilisés |
+| Timer1 | 16 bits | PWM servo 50 Hz, Fast PWM mode 14 |
+| Timer2 | 8 bits | Tick système 1 ms, mode CTC |
+| INT7 | Interruption externe | Capture télécommande IR sur front descendant |
+| UART0 | Série | Miroir LCD et injection de commandes |
+| Bus XMEM | Externe | LCD memory-mapped |
+| GPIO | 53 broches | Stepper, buzzer, servo, IR |
+
+Le processeur tourne à **4 MHz** avec son oscillateur RC interne. Cette fréquence
+peut varier d'environ ±3% selon la température. C'est encore compatible avec le
+décodage RC5, mais seulement parce que la constante `T1` a été calibrée à
+**1870 µs** plutôt qu'aux **1778 µs** théoriques.
+
+### 2.3 Le moteur pas-à-pas X27, l'azimut
+
+Le **X27.168** est un micro-moteur pas-à-pas bipolaire utilisé dans des tableaux
+de bord automobiles. Il possède un réducteur interne de **1:180** :
+
+- 6 patterns électriques = 1 tour moteur = 2° à la sortie ;
+- 3 patterns = 1° ;
+- 1080 patterns = 360°.
+
+| Index | PD3 | PD2 | PD1 | PD0 | Valeur hex | Bobines actives |
+|:---:|:---:|:---:|:---:|:---:|:---:|:---|
+| **0** | 0 | 1 | 0 | 1 | `0x05` | C1+ et C2+ |
+| **1** | 0 | 0 | 0 | 1 | `0x01` | C1+ |
+| **2** | 1 | 0 | 1 | 1 | `0x0B` | C1+ et C2- |
+| **3** | 1 | 0 | 1 | 0 | `0x0A` | C2- |
+| **4** | 1 | 1 | 1 | 0 | `0x0E` | C1- et C2- |
+| **5** | 0 | 1 | 0 | 0 | `0x04` | C2+ |
+
+```asm
+motor_sequence_table:
+    .db 0x05, 0x01, 0x0B, 0x0A, 0x0E, 0x04
+```
+
+Le X27 n'a pas besoin de pont en H externe dans ce montage. Ses bobines font
+environ 160 Ω : à 5 V, cela donne environ 31 mA par bobine, ce qui reste dans
+les capacités des GPIO de l'ATmega128. Le projet attaque donc les bobines
+directement depuis `PORTD[0:3]`.
+
+Le curseur `motor_step_idx` avance ou recule dans la table. Un délai de
+**3 ms** entre deux pas laisse le temps à la mécanique de se stabiliser.
+
+### 2.4 Le servomoteur S3003, l'élévation
+
+Le **Futaba S3003** est commandé par un signal PWM à **50 Hz**. La position est
+proportionnelle à la largeur de l'impulsion :
+
+<ProjectSatellitePointingTiming />
+
+Le **Timer1** est configuré en **Fast PWM mode 14**, avec `ICR1` comme TOP :
+
+| Paramètre | Valeur | Signification |
+|---|---:|---|
+| Prescaler | /8 | 1 tick = 2 µs à 4 MHz |
+| ICR1 | 10 000 | Période de 20 ms, soit 50 Hz |
+| OCR1A min | 500 | Pulse 1.0 ms, donc 0° |
+| OCR1A max | 900 | Pulse 1.8 ms, donc 90° |
+| Résolution | 400 ticks | ~0.225° par tick |
+| Pas utilisateur | 10 ticks | ~2.25° par pression VOL |
+
+```asm
+servo_init:
+    sbi    DDRB, 5
+    OUTI   TCCR1A, (1<<COM1A1)|(1<<WGM11)
+    OUTI   TCCR1B, (1<<WGM13)|(1<<WGM12)|(1<<CS11)
+    LDI2   a1,a0, 10000
+    sts    ICR1H, a1
+    sts    ICR1L, a0
+    LDI2   a1,a0, 500
+    sts    OCR1AH, a1
+    sts    OCR1AL, a0
+    STS2   target_ticks, a1,a0
+    ret
+```
+
+Le double buffering matériel de `OCR1A` évite les glitchs : une nouvelle valeur
+n'est appliquée qu'au prochain passage par TOP.
+
+### 2.5 L'écran LCD HD44780
+
+Le LCD est interfacé via le bus mémoire externe **XMEM** de l'ATmega128. Le
+contrôleur LCD est mappé dans l'espace d'adressage :
+
+<ProjectSatellitePointingMemory />
+
+Écrire un caractère devient une seule instruction assembleur :
+
+```asm
+ldi   a0, 'A'
+sts   0xC000, a0
+```
+
+Le bus XMEM utilise `PORTA` pour les données, `PORTC` pour l'adresse haute et
+`PORTG` pour `/WR`, `/RD` et `ALE`. Le bit `SRE` active le bus externe, avec un
+wait state `SRW10=1` pour respecter le timing du HD44780. Le busy flag doit
+être vérifié avant chaque écriture.
+
+### 2.6 La télécommande infrarouge RC5
+
+Le protocole **RC5** de Philips encode chaque trame sur **14 bits Manchester** :
+
+<ProjectSatellitePointingRc5 />
+
+Le décodeur fonctionne par échantillonnage bit-bang :
+
+1. `INT7` se déclenche sur un front descendant ;
+2. le firmware attend `T1/4` pour se centrer sur le premier bit ;
+3. il lit `PE7`, pousse le bit dans un registre résultat ;
+4. il attend `T1` et répète 14 fois.
+
+```asm
+rc5_capture_from_edge:
+    WAIT_US (T1/4 - 2)
+    ldi     b2, 14
+_rc5_loop:
+    P2C     PINE, 7
+    ROL2    b1, b0
+    WAIT_US (T1 - 4)
+    DJNZ    b2, _rc5_loop
+    com     b0
+    ret
+```
+
+Le **toggle bit** distingue une nouvelle pression d'une touche maintenue. S'il
+change, c'est un nouvel appui ; s'il reste identique, c'est une répétition. Ce
+mécanisme alimente `held_count` pour accélérer le mode MANUEL.
+
+### 2.7 Le buzzer piézoélectrique
+
+Le buzzer est piloté par bit-banging sur `PE2`. Le son standard est un petit
+« doot-doot » descendant de 1500 Hz vers 1000 Hz, sur environ 60 ms.
+
+```asm
+chirp:
+    ldi   _w, 45
+_n1:
+    sbi   BUZZER_PORT, BUZZER_PIN
+    WAIT_US 333
+    cbi   BUZZER_PORT, BUZZER_PIN
+    WAIT_US 333
+    dec   _w
+    brne  _n1
+
+    ldi   _w, 30
+_n2:
+    sbi   BUZZER_PORT, BUZZER_PIN
+    WAIT_US 500
+    cbi   BUZZER_PORT, BUZZER_PIN
+    WAIT_US 500
+    dec   _w
+    brne  _n2
+    ret
+```
+
+### 2.8 L'interface UART
+
+L'UART0 fonctionne à **19 200 bauds**, 8-N-1. Il sert à deux choses :
+
+- **miroir LCD** : chaque rendu LCD est répliqué sur terminal avec des
+  séquences ANSI/VT100 ;
+- **injection de commandes** : les touches du clavier PC sont converties en
+  commandes RC5 équivalentes.
+
+```text title="Miroir UART VT100"
+ESC[H
+---- MCU2026-G111 ----
+MODE: AUTO   LAYER: IN_MODE
+AZ: 0771 steps  EL: 0650 us
+ACTION: MOVING
+--------LCD--------
+L1: Sat: ISS
+L2: AZ:257 EL:024
+--------------------
+```
+
+Le calcul de baudrate est favorable : `UBRR = 4000000 / (16 × 19200) - 1 =
+12.02`. L'arrondi à 12 donne une erreur d'environ **0.16%**, très acceptable.
+À 115 200 bauds, l'erreur aurait été autour de **8.5%**, donc inutilisable.
+
+### 2.9 Carte des broches
+
+| Port | Allocation |
+|---|---|
+| `PORTA` | Bus données LCD, XMEM `AD0-AD7` |
+| `PORTB` | `PB5 = OC1A` vers le servo S3003 |
+| `PORTC` | Adresse haute LCD, XMEM `A8-A15` |
+| `PORTD` | `PD0 = Coil1+`, `PD1 = Coil1-`, `PD2 = Coil2+`, `PD3 = Coil2-` vers le stepper X27 |
+| `PORTE` | `PE0 = TXD0`, `PE1 = RXD0`, `PE2 = buzzer`, `PE7 = IR TSOP / INT7` |
+| `PORTF` | Libre, ADC et extension future |
+| `PORTG` | `PG0 = /WR`, `PG1 = /RD`, `PG2 = ALE` pour le contrôle XMEM |
+
+## 3. Architecture logicielle
+
+### 3.1 Philosophie de conception
+
+Le code est séparé en deux couches :
+
+<ProjectSatellitePointingSoftwareLayers />
+
+Les drivers ne connaissent pas la FSM. Ils exposent des primitives comme
+`step_motor_forward`, `servo_nudge_up` ou `load_satellite`. Les libs orchestrent
+ces primitives et maintiennent la logique applicative.
+
+### 3.2 La machine à états
+
+<ProjectSatellitePointingFsm />
+
+La FSM est volontairement divisée en deux couches. `BROWSING` choisit le mode,
+`IN_MODE` exécute le mode. Le bouton `AV` bascule entre les deux. `POWER` force
+le retour vers `BROWSING` depuis n'importe quel état et agit comme arrêt
+d'urgence.
+
+Le verrou `can_transition` empêche de changer de mode pendant un mouvement
+automatique. Sans cette protection, un Go-To interrompu au mauvais moment
+pourrait désynchroniser la position SRAM et la position physique du stepper.
+
+### 3.3 La boucle principale
+
+Le firmware suit un pattern coopératif non-préemptif :
+
+| Priorité | Test dans la boucle | Action |
+|---:|---|---|
+| 1 | Overlay expiré ? | Restaurer `lcd_l2_buf` et redessiner le LCD |
+| 2 | Donnée UART ? | Convertir l'ASCII en commande RC5 synthétique |
+| 3 | `ir_event_flag` ? | Dispatcher la commande utilisateur |
+| 4 | `flag_is_moving` ? | Appeler le handler actif avec `cmd = 0xFF` |
+| 5 | Rien à faire | Reboucler immédiatement |
+
+Points subtils :
+
+- l'UART est pollé avant le flag IR ;
+- quand `flag_is_moving = 1`, les handlers avancent le mouvement par petits
+  pas, sans OS ni scheduler ;
+- les handlers remplissent `lcd_l2_buf`, puis `draw_lcd` fait le rendu final ;
+- les commandes sont dispatchées avec priorité : `POWER`, puis overlays, `MUTE`,
+  `AV`, puis handler de mode.
+
+### 3.4 Organisation du code
+
+```text
+code_source/
+├── main.asm                    Point d'entrée, ISR, dispatch FSM
+├── Projet_MC.asmproj           Projet Atmel Studio, ATmega128
+│
+├── libs/
+│   ├── constants.inc           Constantes .equ
+│   ├── definitions.asm         Alias registres, constantes HW
+│   ├── macros.asm              1840 lignes de macros AVR
+│   ├── pinout.inc              Allocation des broches
+│   ├── shared_handlers.asm     Colle FSM
+│   ├── overlay.asm             Messages transitoires temporisés
+│   ├── display.asm             Rendu LCD
+│   ├── mode_auto.asm           Mode AUTO
+│   ├── mode_manuel.asm         Mode MANUEL
+│   └── mode_scan.asm           Mode SCAN
+│
+├── drivers/
+│   ├── rc5_logic.asm           Décodage IR RC5
+│   ├── lcd.asm                 Driver HD44780 via XMEM
+│   ├── logique_pointage.asm    PWM servo et math pointage
+│   ├── 0ec_motor_sequence.asm  Séquence stepper X27
+│   ├── eeprom_layout.asm       Base EEPROM
+│   ├── timer_manager.asm       Timer2 CTC 1 ms
+│   ├── uart_control.asm        Miroir UART et injection
+│   ├── buzzer.asm              Bips
+│   └── math_revised.asm        Arithmétique 16 bits
+│
+├── libraries_cours/
+│   └── uart_et_strings/
+│       └── uart.asm            UART0 fourni par le cours
+│
+└── Debug/
+    ├── Projet_MC.hex           Firmware Intel HEX
+    └── Projet_MC.eep           Image EEPROM initiale
+```
+
+L'ordre des `.include` dans `main.asm` est critique, car le code assembleur est
+linéarisé :
+
+```asm
+.include "libs/definitions.asm"
+.include "libs/macros.asm"
+.include "libs/constants.inc"
+.include "libs/pinout.inc"
+.include "libs/shared_handlers.asm"
+.include "libs/overlay.asm"
+.include "libs/display.asm"
+.include "libs/mode_auto.asm"
+.include "libs/mode_manuel.asm"
+.include "libs/mode_scan.asm"
+.include "drivers/rc5_logic.asm"
+.include "drivers/logique_pointage.asm"
+; ...
+.include "drivers/lcd.asm"
+```
+
+`lcd.asm` est placé en dernier car certaines routines l'appellent avec `call`
+plutôt que `rcall`. Sur AVR, `rcall` est limité à ±2K mots ; `call` n'a pas
+cette limite, mais coûte 2 cycles de plus.
+
+### 3.5 Conventions de registres
+
+| Registre(s) | Alias | Rôle |
+|---|---|---|
+| `r0` | `char` | Cible implicite de `LPM` |
+| `r1` | `_sreg` | Sauvegarde `SREG` dans les ISR |
+| `r2` | `_u` | Sauvegarde de `u` dans les ISR |
+| `r3` | `u` | Scratch pour `WAIT_US` / `WAIT_MS` |
+| `r4-r5` | `e0`, `e1` | Temporaires `PRINTF` |
+| `r6-r7` | — | Libres |
+| `r8-r11` | `c0..c3` | Résultat de `mul22` / `div22` |
+| `r12-r15` | `d0..d3` | Reste de `div22` |
+| `r16` | `w` | Registre de travail principal |
+| `r17` | `_w` | Registre de travail secondaire / ISR |
+| `r18-r21` | `a0..a3` | Opérande A, 32 bits |
+| `r22-r25` | `b0..b3` | Opérande B, 32 bits |
+| `r26-r27` | `X` | Pointeur X |
+| `r28-r29` | `Y` | Pointeur Y |
+| `r30-r31` | `Z` | Pointeur Z et accès `LPM` |
+
+Les registres `r0-r15` ne supportent pas `ldi`, `cpi` ou `andi`. Les macros du
+cours contournent cette asymétrie avec des pseudo-instructions comme `_LDI`,
+`_CPI` et `_ANDI`.
+
+### 3.6 La bibliothèque de macros
+
+`macros.asm` compte environ **1840 lignes**. Il fournit :
+
+| Catégorie | Exemples | Usage |
+|---|---|---|
+| Pointeurs | `LDIX`, `LDIY`, `LDIZ` | Charger une adresse SRAM ou Flash |
+| I/O | `OUTI`, `OUTEI` | Écrire une valeur immédiate dans un port |
+| Attente | `WAIT_US`, `WAIT_MS` | Délais calibrés à 4 MHz |
+| Branchement | `JK`, `JNK`, `JSK` | Sauts conditionnels étendus |
+| Multi-octets | `LDI2`, `STS2`, `ADD2`, `CP2` | Arithmétique 16/32 bits |
+| Bits | `MOVB`, `JB0`, `JB1`, `P2C` | Manipulation de bits |
+| Pile | `PUSH2`, `POP2` | Sauvegarde de paires |
+
+## 4. Les trois modes
+
+### 4.1 Mode MANUEL
+
+Le mode **MANUEL** fait de la télécommande un joystick :
+
+| Touche | Effet |
+|---|---|
+| `CH+` | Azimut positif |
+| `CH-` | Azimut négatif |
+| `VOL+` | Élévation positive |
+| `VOL-` | Élévation négative |
+| `GUIDE` | Armer puis confirmer la sauvegarde |
+
+L'accélération progressive dépend de `held_count` :
+
+| Maintien | Pas par répétition | Vitesse approximative |
+|---|---:|---:|
+| moins de 1 s | 1° | ~10°/s |
+| 1 à 3 s | 5° | ~50°/s |
+| plus de 3 s | 10° | ~100°/s |
+
+```asm
+pick_step_size:
+    lds   w, held_count
+    cpi   w, HOLD_THRESHOLD_FAST
+    brsh  _fast
+    cpi   w, HOLD_THRESHOLD_MED
+    brsh  _med
+_slow:
+    ldi   a0, HOLD_STEP_SLOW
+    ret
+_med:
+    ldi   a0, HOLD_STEP_MED
+    ret
+_fast:
+    ldi   a0, HOLD_STEP_FAST
+    ret
+```
+
+La sauvegarde se fait en deux pressions : le premier `GUIDE` affiche
+`SAVE:PRESS GUIDE`, le second écrit la position courante dans le premier slot
+EEPROM libre. L'overlay `SAVED` reste affiché pendant environ 500 ms.
+
+### 4.2 Mode AUTO
+
+Le mode **AUTO** est un navigateur de base satellites. Il affiche le nom de la
+cible et ses coordonnées :
+
+<ProjectSatellitePointingLcdMock
+  line1="Sat: ISS"
+  line2="AZ:257 EL:024"
+  caption="Rendu logique du LCD 2×16 en mode AUTO."
+/>
+
+`CH+` et `CH-` passent au satellite valide suivant ou précédent. Les touches
+`0-9` donnent un accès direct aux premiers slots. Le curseur saute les slots
+vides, identifiés par l'absence du magic byte `0x5A`. Un compteur de sécurité
+limité à 32 essais évite une boucle infinie si la base est vide.
+
+Le Go-To déclenché par `GUIDE` se déroule en deux phases :
+
+1. calcul du plus court chemin d'azimut ;
+2. mouvement du stepper jusqu'à la cible ;
+3. ajustement de l'élévation par servo ;
+4. chirp et overlay `ARRIVED`.
+
+La suppression utilise aussi deux pressions :
+
+1. premier `DEL` : `DEL? PUSH DEL` ;
+2. deuxième `DEL` : magic byte mis à `0x00`, overlay `DELETED` ;
+3. toute autre touche annule la suppression.
+
+### 4.3 Mode SCAN
+
+Le mode **SCAN** effectue un balayage de **360°**. Il compare chaque degré
+d'azimut à la base satellites et détecte les cibles compatibles avec l'élévation
+courante.
+
+<ProjectSatellitePointingScanFlow />
+
+Un satellite est détecté si :
+
+- son azimut correspond au degré courant ;
+- son élévation est dans la bande `élévation_courante ± 10°`.
+
+La tolérance d'élévation simule le lobe d'ouverture d'une vraie antenne.
+
+Le mode charge d'abord les données EEPROM dans un cache SRAM :
+
+| Buffer SRAM | Taille | Rôle |
+|---|---:|---|
+| `scan_cache_az` | 64 octets | 32 azimuts stockés sur 2 octets |
+| `scan_cache_el` | 32 octets | 32 élévations stockées sur 1 octet |
+| `scan_cache_valid` | 4 octets | Bitmap de validité des 32 slots |
+
+Sans cache, un tour complet demanderait environ `360 × 32` accès EEPROM. Avec
+le cache, il reste seulement 32 lectures initiales puis des comparaisons SRAM.
+
+Les résultats sont stockés dans un bitmap de 32 bits :
+
+| Octet | Slots représentés |
+|---|---|
+| `scan_results[0]` | slots 0 à 7 |
+| `scan_results[1]` | slots 8 à 15 |
+| `scan_results[2]` | slots 16 à 23 |
+| `scan_results[3]` | slots 24 à 31 |
+
+L'accès au bit utilise une LUT en Flash :
+
+```asm
+bitmask_lut:
+    .db 1, 2, 4, 8, 16, 32, 64, 128
+```
+
+Après le sweep, si au moins un bit est positionné, `slot_filter_mode = 1` et le
+navigateur AUTO ne montre plus que les satellites détectés.
+
+## 5. Mini-lab interactif
+
+Le composant ci-dessous rejoue les calculs essentiels du firmware : chemin
+azimutal le plus court, conversion en pas partiels du X27, largeur PWM du servo
+et fenêtre de détection du SCAN.
+
+<ProjectSatellitePointingLab />
+
+## 6. Deep-dive technique
+
+### 6.1 Décodage RC5
+
+Le décodage RC5 est le morceau le plus sensible au timing. Le TSOP fournit un
+signal digital, mais pas d'horloge. Le firmware échantillonne donc au centre de
+chaque bit Manchester.
+
+| Étape | Timing | Rôle |
+|---:|---|---|
+| 1 | Front descendant sur `PE7` | Déclenche `INT7` |
+| 2 | Attente `T1/4` | Se placer au centre du premier bit |
+| 3 | Lecture de `PE7` | Échantillonner `S1`, puis `S2`, `Toggle`, `Adresse`, `Commande` |
+| 4 | Attente `T1` | Passer au centre du bit suivant |
+| 5 | 14 répétitions | Recomposer la trame RC5 complète |
+
+L'ISR `EXT_INT7` est bloquante pendant environ **26 ms**. Pendant ce temps,
+aucune autre interruption n'est servie et la boucle principale est gelée. C'est
+un compromis assumé : capturer la trame sans jitter est prioritaire, et les
+overlays de 500 ms tolèrent cette erreur temporelle.
+
+### 6.2 PWM servo
+
+Le Timer1 16 bits est le bon choix pour le servo :
+
+| Option | Résolution | Fréquence | Problème |
+|---|---:|---:|---|
+| Timer0 Fast PWM | ~31 µs | 1.9 kHz | Trop rapide pour un servo |
+| Timer0 Phase Correct | ~31 µs | 961 Hz | Encore trop rapide |
+| Timer1 Fast PWM 14 | 2 µs | 50 Hz | Adapté |
+
+La relation est :
+
+$$
+f_{PWM} = \frac{f_{CPU}}{\text{prescaler} \times (\text{TOP}+1)}
+        = \frac{4\,000\,000}{8 \times 10\,001}
+        \approx 50\ \text{Hz}
+$$
+
+Un bug matériel a marqué le projet : la première version utilisait PB4/OC0
+avec Timer0. La fréquence disponible faisait vibrer le servo au lieu de le
+positionner. Le déplacement du jumper M4 vers PB5/OC1A pour utiliser Timer1 a
+résolu le problème.
+
+### 6.3 Stepper et demi-pas
+
+Le X27 est un moteur bipolaire à deux bobines. Le pilotage alterne entre états
+à deux bobines et états à une bobine :
+
+| Position | C1+ | C1- | C2+ | C2- | Champ magnétique |
+|:---:|:---:|:---:|:---:|:---:|---|
+| 0 | ON | off | ON | off | Nord-Est |
+| 1 | ON | off | off | off | Est |
+| 2 | ON | off | off | ON | Sud-Est |
+| 3 | off | off | off | ON | Sud |
+| 4 | off | ON | off | ON | Sud-Ouest |
+| 5 | off | ON | off | off | Ouest |
+
+Avec le réducteur 1:180, il faut `6 × 180 = 1080` pas partiels pour un tour
+complet, soit 1/3° par pas.
+
+### 6.4 EEPROM persistante
+
+Chaque slot satellite occupe 16 octets :
+
+| Offset | Contenu | Taille | Exemple ISS |
+|---:|---|---:|---|
+| 0 | Magic byte | 1 octet | `0x5A` |
+| 1-10 | Nom ASCII padded | 10 octets | `"ISS       "` |
+| 11-12 | Azimut little-endian | 2 octets | `0x0101 = 257°` |
+| 13 | Élévation | 1 octet | `0x18 = 24°` |
+| 14-15 | Padding | 2 octets | `0x0000` |
+
+L'écriture EEPROM impose une séquence critique :
+
+```asm
+EEPROM_write_byte:
+    sbic   EECR, EEWE
+    rjmp   EEPROM_write_byte
+    out    EEARH, r17
+    out    EEARL, r16
+    out    EEDR, r18
+    in     r19, SREG
+    cli
+    sbi    EECR, EEMWE
+    sbi    EECR, EEWE
+    out    SREG, r19
+    ret
+```
+
+Le `cli` est indispensable. Si une interruption se produit entre `EEMWE` et
+`EEWE`, le délai de 4 cycles est dépassé et l'écriture peut échouer
+silencieusement.
+
+### 6.5 LCD memory-mapped
+
+Grâce à XMEM, une commande LCD ressemble à une écriture mémoire normale :
+
+```asm
+ldi   w, 0x01
+sts   LCD_IR, w
+```
+
+Le matériel génère ensuite les signaux : données sur `PORTA`, adresse haute sur
+`PORTC`, pulse `ALE`, puis pulse `/WR`.
+
+### 6.6 Overlays temporisés
+
+Les overlays affichent temporairement `SAVED`, `DELETED`, `UART ON`, `ARRIVED`
+ou d'autres messages sur la ligne 2 du LCD.
+
+<ProjectSatellitePointingOverlayFlow />
+
+`overlay_ms_left` est sur 16 bits ; les écritures depuis le contexte principal
+sont donc protégées par `cli/sei`.
+
+### 6.7 UART comme debug en production
+
+Le miroir UART est un outil de debug embarqué. Quand il est actif, chaque
+affichage LCD envoie aussi l'état interne sur terminal :
+
+- couche FSM ;
+- mode courant ;
+- position azimut et élévation ;
+- statut de mouvement ;
+- contenu logique des deux lignes LCD.
+
+L'injection de commandes forge un événement IR synthétique : l'UART écrit dans
+`last_cmd`, inverse `last_tog`, positionne le flag, puis la boucle principale
+traite la commande exactement comme si elle venait de la télécommande.
+
+## 7. Algorithmes clés
+
+### 7.1 Chemin le plus court en azimut
+
+L'azimut vit sur un cercle. Aller de 350° à 10° doit prendre +20°, pas -340°.
+
+```asm
+shortest_path_az:
+    sub    r18, r16
+    sbc    r19, r17
+
+    cpi    r18, low(181)
+    ldi    w, high(181)
+    cpc    r19, w
+    brlt   _check_neg
+    subi   r18, low(360)
+    sbci   r19, high(360)
+
+_check_neg:
+    cpi    r18, low(-180)
+    ldi    w, high(-180)
+    cpc    r19, w
+    brge   _done
+    subi   r18, low(-360)
+    sbci   r19, high(-360)
+
+_done:
+    mov    r16, r18
+    mov    r17, r19
+    ret
+```
+
+### 7.2 Arithmétique 16 bits en assembleur
+
+L'ATmega128 est 8 bits. Les nombres 16 bits demandent donc des paires de
+registres et une propagation manuelle des retenues.
+
+Multiplication 16×16 bits :
+
+```asm
+mul22:
+    CLR2   c3, c2
+    LDI2   c1, c0, b1, b0
+    ldi    w, 16
+_mul_loop:
+    LSR2   c1, c0
+    brcc   _mul_no_add
+    ADD2   c3, c2, a1, a0
+_mul_no_add:
+    ROR4   c3,c2,c1,c0
+    DJNZ   w, _mul_loop
+    ret
+```
+
+Division 16÷16 bits non-restoring :
+
+```asm
+div22:
+    MOV2   c1,c0, a1,a0
+    CLR2   d1, d0
+    ldi    w, 16
+_div_loop:
+    ROL4   d1,d0,c1,c0
+    SUB2   d1,d0, b1,b0
+    brcc   _div_ok
+    ADD2   d1,d0, b1,b0
+_div_ok:
+    ROL2   c1, c0
+    DJNZ   w, _div_loop
+    COM2   c1, c0
+    ret
+```
+
+### 7.3 Accélération hold-to-accelerate
+
+La télécommande envoie environ 9 trames par seconde quand une touche est
+maintenue. Le toggle bit reste alors constant :
+
+| Situation | Toggle bit | `held_count` |
+|---|---|---|
+| Touche maintenue | `1, 1, 1, 1, ...` | `0, 1, 2, 3, ...` |
+| Touche relâchée puis ré-appuyée | `1, 1, 1` puis `0, 0, 0` | reset à `0`, puis recommence |
+
+Les seuils `10` et `30` répétitions correspondent à environ 1 s et 3 s.
+
+### 7.4 Bitmap de détection
+
+Pour tester ou positionner le bit du slot `N` :
+
+| Quantité | Calcul |
+|---|---|
+| Octet cible | `byte_offset = N / 8` |
+| Bit dans l'octet | `bit_position = N % 8` |
+| Masque | `mask = bitmask_lut[bit_position]` |
+
+La LUT `{1, 2, 4, 8, 16, 32, 64, 128}` remplace une boucle de shift. On dépense
+8 octets de Flash pour rendre l'accès O(1).
+
+## 8. Guide utilisateur
+
+### 8.1 Mise en route
+
+Matériel requis :
+
+- carte STK-300 avec ATmega128L ;
+- module M1 pour le stepper ;
+- module M2 pour IR et buzzer ;
+- module M4 pour le servo ;
+- télécommande Vivanco UR Z2 compatible RC5 ;
+- câble USB pour l'alimentation et éventuellement l'UART.
+
+Procédure :
+
+1. brancher l'alimentation de la STK-300 ;
+2. attendre `MODE: AUTO` / `AZ:000 EL:000` sur le LCD ;
+3. laisser le servo se positionner à 0° ;
+4. aligner manuellement le stepper si nécessaire ;
+5. activer le miroir UART avec `MUTE` si besoin.
+
+### 8.2 Commandes télécommande
+
+| Touche | BROWSING | MANUEL | AUTO | SCAN |
+|---|---|---|---|---|
+| `CH+` / `CH-` | Changer de mode | Azimut ± | Satellite suivant/précédent | Inactif |
+| `VOL+` / `VOL-` | Inactif | Élévation ±2.25° | Inactif | Inactif |
+| `AV` | Entrer dans le mode | Sortir | Sortir | Sortir |
+| `GUIDE` | Inactif | Sauvegarder | Lancer Go-To | Lancer sweep |
+| `DEL` | Inactif | Inactif | Supprimer | Inactif |
+| `0-9` | Inactif | Inactif | Accès direct slot | Inactif |
+| `MUTE` | Toggle UART | Toggle UART | Toggle UART | Toggle UART |
+| `POWER` | Arrêt urgence | Arrêt urgence | Arrêt urgence | Arrêt urgence |
+
+### 8.3 Commandes UART
+
+Terminal série : **19 200 bauds**, **8-N-1**.
+
+| Touche clavier | Commande RC5 | Fonction |
+|---|---|---|
+| `W` / `w` | `VOL_UP` | Élévation + |
+| `S` / `s` | `VOL_DN` | Élévation - |
+| `A` / `a` | `CH_UP` | Azimut + ou mode suivant |
+| `D` / `d` | `CH_DN` | Azimut - ou mode précédent |
+| Espace | `GUIDE` | Action principale |
+| `X` / `x` | `DEL` | Supprimer satellite |
+| `M` / `m` | `AV` | Entrer ou sortir du mode |
+| `P` / `p` | `POWER` | Arrêt d'urgence |
+| `0-9` | `CMD_0..9` | Accès direct slot |
+| `L` / `l` | spécial UART | Dump liste satellites |
+| `U` / `u` | `MUTE` | Toggle miroir UART |
+
+### 8.4 Signaux sonores
+
+| Son | Signification |
+|---|---|
+| 1 chirp | Confirmation simple |
+| 1 chirp par satellite | Détection pendant le SCAN |
+| 2 chirps | Arrêt d'urgence `POWER` |
+| 1 chirp + overlay | Transit terminé |
+
+## 9. Journal de développement
+
+### 9.1 Timeline
+
+Le projet a été développé en un sprint d'environ **48 heures**, du **24 au 26
+mai 2026**.
+
+```text
+24 mai 2026 — Jour 1 : fondations
+
+12:40  Lars    Initial commit
+18:19  Jean    Ajout documents + bibliothèques cours + helpers
+19:07  Jean    Intégration helpers + réorganisation des dépendances
+21:19  Jean    Mode save + contrôle EEPROM + feux rouges v3
+21:56  Jean    Fix bug mode save
+22:31  Jean    Mode AUTO v1
+22:57  Jean    Fix scroll + mouvement en arrière-plan + deg→pas
+23:36  Jean    Fix bug mode auto
+
+25 mai 2026 — Jour 2 : la nuit la plus longue
+
+00:11  Jean    Fix bug mode auto
+01:06  Jean    New fix mode auto
+01:27  Jean    Magic byte implementation
+01:42  Jean    Empty slot try again
+02:24  Lars    empty fix + save_not_working
+02:42  Jean    fix save cette fois (baruch hashem si ça marche)
+02:50  Jean    fix 2/3 bugs en plus pour save
+03:00  Jean    Élévation en degrés + EL max 1800
+03:21  Jean    Fonction delete
+03:38  Jean    Fix affichage LCD suppression
+16:16  Lars    SCAN MODE IMPLÉMENTÉ
+17:45  Jean    UART test 1
+18:05  Jean    Fix UART bugs
+18:25  Jean    Fix registre r16 pour UART + affichage LCD dans UART
+18:38  Jean    Fix UART bug encore
+18:52  Jean    Retour arrière UART + correction affichages satellites
+19:00  Jean    Reset UART first try
+19:11  Jean    Nettoyage : arrêt suivi dossier Debug
+19:13  Jean    Revert "add UART test 1"
+19:14  Jean    Ajout .gitignore pour Debug
+19:31  Jean    fix uart STPPPPPP ça marche
+19:55  Jean    Fix affichage UART
+20:02  Jean    Fix affichage UART
+20:16  Jean    Ajout touches pour UART
+20:31  Jean    Toggle pour UART
+20:38  Jean    Fix toggle UART
+21:54  Lars    Buzzer fix
+23:41  Lars    Refactor + timer displays
+
+26 mai 2026 — Jour 3 : finition
+
+02:30  Lars    IR interrupts
+04:28  Lars    final_v1
+14:01  Lars    init github
+14:06  Lars    change names
+```
+
+### 9.2 Les galères mémorables
+
+La saga du **Save** a été le bug le plus tenace. Entre 01h et 03h du matin,
+plusieurs commits se sont enchaînés autour du format EEPROM. Le vrai problème :
+un décalage d'un octet dans le slot, avec 5 espaces de padding au lieu de 4,
+décalait les champs azimut et élévation.
+
+La saga de l'**UART** a demandé environ 15 commits en 3 heures, dont un revert
+complet. Le bug principal venait de `r16` alias `w`, modifié par des macros
+utilisées dans le driver UART, ce qui corrompait la commande RC5 forgée.
+
+### 9.3 Statistiques
+
+| Métrique | Valeur |
+|---|---:|
+| Commits totaux | 40 |
+| Durée | ~48 heures |
+| Commits par Jean | 31, soit 78% |
+| Commits par Lars | 9, soit 22% |
+| Lignes de code | ~5 762 lignes `.asm` / `.inc` |
+| Fichiers source | 20 |
+| Nuit blanche | Au moins 1 |
+| Commit le plus désespéré | `fix save cette fois (baruch hashem si ça marche)` |
+
+## 10. Concepts du cours appliqués
+
+| Concept | Application |
+|---|---|
+| Timer CTC | Timer2 avec `OCR2=124`, tick 1 ms pour les overlays |
+| Timer Fast PWM | Timer1 mode 14, PWM 50 Hz pour le servo |
+| Prescaler | Timer1 `/8`, Timer2 `/32` |
+| Double buffering OCR | `OCR1A` bufferisé pour éviter les glitchs servo |
+| Interruption externe | `INT7` sur front descendant pour RC5 |
+| ISR | `.org INT7addr` et `.org OC2addr` dans `main.asm` |
+| Sauvegarde contexte | Push/pop de `SREG`, `r16`, `r17` et registres touchés |
+| Section critique | EEPROM et accès 16 bits à `overlay_ms_left` |
+| Architecture Harvard | Flash, SRAM et EEPROM séparées |
+| LPM | Lecture tables stepper, chaînes LCD, LUT bitmask |
+| XMEM | LCD HD44780 à `0x8000` / `0xC000` |
+| UART asynchrone | 19 200 bauds, polling RXC0 |
+| Manchester | Décodage RC5 par échantillonnage bit-bang |
+| Adressage indirect | X/Y/Z pour buffers SRAM, EEPROM, Flash |
+| Machine à états | FSM à deux couches |
+| Arithmétique multi-octets | `mul22`, `div22`, comparaisons 16 bits |
+
+## 11. Compilation et déploiement
+
+Environnement :
+
+- IDE : Atmel Studio ou Microchip Studio ;
+- cible : ATmega128 ;
+- configuration : Debug.
+
+Pour recompiler :
+
+1. ouvrir `code_source/Projet_MC.asmproj` ;
+2. vérifier `Project → Properties → Device = ATmega128` ;
+3. lancer `Build → Build Solution` ou `F7`.
+
+Fichiers de sortie :
+
+| Fichier | Description | Usage |
+|---|---|---|
+| `Debug/Projet_MC.hex` | Firmware principal Intel HEX | Flash via ISP/JTAG |
+| `Debug/Projet_MC.eep` | Image EEPROM initiale | Programme les 10 satellites |
+| `Debug/Projet_MC.lss` | Listing assembleur | Debug et vérification |
+| `Debug/Projet_MC.map` | Carte mémoire | Vérifier les adresses |
+
+Flash via `avrdude` :
+
+```bash
+avrdude -p m128 -c stk500 -U flash:w:Projet_MC.hex:i
+avrdude -p m128 -c stk500 -U eeprom:w:Projet_MC.eep:i
+```
+
+## 12. Rétrospective
+
+### 12.1 Ce qui a bien fonctionné
+
+- la séparation **drivers/libs** a permis de travailler en parallèle ;
+- le framework de macros du cours a rendu l'assembleur soutenable ;
+- le miroir UART a été indispensable pour diagnostiquer l'état interne ;
+- la FSM à deux couches a bien absorbé l'ajout du mode SCAN.
+
+### 12.2 Ce qu'on referait différemment
+
+- ajouter un référencement automatique du stepper au démarrage ;
+- remplacer l'ISR RC5 bloquante par un décodage non bloquant avec Timer Capture ;
+- construire des tests unitaires via simulateur AVR pour les algorithmes math et
+  la logique FSM.
+
+### 12.3 Limites du système
+
+- pas de tracking orbital en temps réel ;
+- pas de communication radio avec les satellites ;
+- oscillateur RC à ±3%, ce qui limite la marge de décodage RC5 ;
+- pas de sauvegarde de la position azimut entre deux redémarrages.
+
+## 13. Annexes techniques
+
+### 13.1 Carte mémoire SRAM
+
+| Adresse | Variable | Taille | Description |
+|---|---|---:|---|
+| `0x0100` | `last_addr` | 1B | Adresse RC5 dernière trame |
+| `0x0101` | `last_cmd` | 1B | Commande RC5 dernière trame |
+| `0x0102` | `last_tog` | 1B | Toggle bit RC5 |
+| `0x0103` | `ir_event_flag` | 1B | Flag ISR → main |
+| `0x0104` | `mode` | 1B | `0=AUTO`, `1=MANUEL`, `2=SCAN` |
+| `0x0105` | `sub_state` | 1B | Sous-état du mode actif |
+| `0x0106` | `fsm_layer` | 1B | `0=BROWSING`, `1=IN_MODE` |
+| `0x0107` | `flag_is_moving` | 1B | Transit moteur en cours |
+| `0x0108` | `lcd_l2_buf` | 16B | Buffer ligne 2 LCD |
+| `0x0118` | `current_az_steps` | 2B | Position azimut `0..1079` |
+| `0x011A` | `held_count` | 1B | Compteur répétitions RC5 |
+| `0x011B` | `target_ticks` | 2B | Consigne `OCR1A` servo |
+| `0x011D` | `auto_substate` | 1B | Sous-état AUTO |
+| `0x011E` | `target_sat_id` | 1B | Index curseur satellite |
+| `0x011F` | `target_az_auto` | 2B | AZ cible |
+| `0x0121` | `target_el_auto` | 1B | EL cible |
+| `0x0122` | `current_sat_name` | 11B | Nom satellite |
+| `0x012D` | `slot_filter_mode` | 1B | `0=normal`, `1=filtre SCAN` |
+| `0x012E` | `scan_results` | 4B | Bitmap 32 bits |
+| `0x0132` | `scan_cache_az` | 64B | Cache AZ |
+| `0x0172` | `scan_cache_el` | 32B | Cache EL |
+| `0x0192` | `scan_cache_valid` | 4B | Bitmap validité cache |
+| `0x0196` | `scan_steps_done` | 2B | Progression sweep |
+| `0x0198` | `scan_el_at_start` | 1B | Snapshot EL |
+| `0x0199` | `motor_step_idx` | 1B | Curseur séquence stepper |
+| `0x019A` | `uart_enabled` | 1B | Miroir UART actif |
+| `0x019B` | `overlay_ms_left` | 2B | Compteur overlay |
+| `0x019D` | `overlay_dirty` | 1B | Flag expiration overlay |
+
+### 13.2 Satellites pré-programmés
+
+| Slot | Satellite | Azimut | Élévation | Type |
+|---:|---|---:|---:|---|
+| 0 | ISS | 257° | 24° | Station spatiale |
+| 1 | Hubble | 142° | 56° | Télescope spatial |
+| 2 | Tiangong | 89° | 72° | Station spatiale |
+| 3 | Starlink | 310° | 45° | Constellation LEO |
+| 4 | Envisat | 15° | 81° | Observation Terre |
+| 5 | NOAA-19 | 198° | 33° | Météorologie |
+| 6 | Iridium | 275° | 65° | Communication |
+| 7 | Terra | 45° | 12° | Observation Terre |
+| 8 | Aqua | 120° | 88° | Observation Terre |
+| 9 | Suomi NPP | 82° | 41° | Météorologie |
+
+### 13.3 EEPROM initiale Intel HEX
+
+```text
+:100000005A495353202020202020200101180000AD
+:100010005A487562626C65202020208E00380000F3
+:100020005A5469616E676F6E67202059004800002B
+:100030005A537461726C696E6B202036012D000016
+:100040005A456E766973617420202020200F005100B0
+:100050005A4E4F41412D31392020C600210000D2
+:100060005A49726964697570202013014100003B
+:100070005A5465727261202020202D000C000055
+:100080005A41717561202020202078005800002E
+:100090005A53756F6D69204E505052002900002C
+:00000001FF
+```
+
+### 13.4 Constantes principales
+
+```asm
+T1                  = 1870
+TOGGLE_MASK         = 0x08
+
+MODE_AUTO           = 0
+MODE_MANUEL         = 1
+MODE_SCAN           = 2
+MODE_COUNT          = 3
+LAYER_BROWSING      = 0
+LAYER_IN_MODE       = 1
+
+ST_AUTO_BROWSING    = 0
+ST_AUTO_MOVING_AZ   = 1
+ST_AUTO_MOVING_EL   = 2
+ST_AUTO_ARRIVED     = 3
+ST_AUTO_CONFIRM_DEL = 4
+
+ST_SCAN_IDLE          = 0
+ST_SCAN_SWEEPING      = 1
+ST_SCAN_NO_RESULTS    = 2
+ST_SCAN_RESULTS_BROWSE = 3
+
+CMD_0 .. CMD_9      = 0x00..0x09
+CMD_DEL             = 0x0A
+CMD_POWER           = 0x0C
+CMD_MUTE            = 0x0D
+CMD_VOL_UP          = 0x10
+CMD_VOL_DN          = 0x11
+CMD_CH_UP           = 0x20
+CMD_CH_DN           = 0x21
+CMD_GUIDE           = 0x22
+CMD_AV              = 0x38
+
+TIMER_TOP           = 10000
+TICKS_MIN           = 500
+TICKS_MAX           = 900
+TICKS_STEP          = 10
+
+AZ_MAX_STEPS        = 1080
+AZ_STEP_PARTIAL     = 3
+STEPPER_DELAY_MS    = 3
+
+HOLD_THRESHOLD_MED  = 10
+HOLD_THRESHOLD_FAST = 30
+HOLD_STEP_SLOW      = 1
+HOLD_STEP_MED       = 5
+HOLD_STEP_FAST      = 10
+
+SAT_MAGIC           = 0x5A
+SAT_SLOT_SIZE       = 16
+SAT_MAX_SLOTS       = 32
+SAT_NAME_LEN        = 10
+```
+
+### 13.5 Références techniques
+
+1. **ATmega128/128L Datasheet**, Atmel/Microchip, document 2467.
+2. **TSOP1838**, Vishay, récepteur IR démodulateur 38 kHz.
+3. **HD44780U**, Hitachi, contrôleur LCD dot-matrix.
+4. **Futaba S3003**, spécification servo analogique standard.
+5. **Switec X27.168**, micro-stepper bipolaire pour instrumentation.
+6. **Vivanco UR Z2**, télécommande universelle RC5.
+7. **RC5 Protocol**, Philips, protocole infrarouge bi-phase.
+
+## 14. Assets à ajouter plus tard
+
+Oui, j'inclurais une vidéo. C'est même l'asset le plus utile pour ce projet :
+un système embarqué avec moteurs, LCD et télécommande se comprend beaucoup plus
+vite en mouvement qu'en photo. Idéalement, une vidéo courte de **20 à 40
+secondes** suffit.
+
+À ajouter si possible :
+
+- une vidéo de démonstration montrant successivement `MANUEL`, `AUTO`, puis
+  `SCAN` ;
+- une capture du terminal UART avec le miroir VT100 actif ;
+- une photo ou un schéma de câblage annoté avec `PB5`, `PE7`, `PE2`, `PD0:3`,
+  `PE0/1` et les modules M1/M2/M4 ;
+- une photo rapprochée du servo et de la tête d'antenne pour visualiser l'axe
+  d'élévation ;
+- une capture nette du LCD au démarrage, en `MODE: AUTO` ;
+- une capture pendant `MANUEL MOVING` ;
+- une capture pendant `SCANNING AZ:xxx` ou `N SATS DETECTED` ;
+- un chronogramme RC5 propre, exporté depuis une simulation ou redessiné ;
+- un schéma plus propre de l'organigramme de la boucle principale ;
+- éventuellement un court GIF du mini-balai SCAN si la vidéo complète est trop
+  lourde pour la page.
+
+## Rapport original
+
+Le PDF ci-dessous conserve la version académique complète du projet, avec les
+annexes et le code source remis.
+
+<PdfViewer
+  src="/projects/station-pointage-satellites/stations-de-pointage-de-satellites-report.pdf"
+  title="Station de pointage d'antenne satellitaire — rapport original"
+  caption="Rapport complet du projet MICRO-210 EPFL, incluant la documentation technique, les annexes, les tableaux périphériques et le code assembleur."
+/>

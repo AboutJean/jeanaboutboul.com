@@ -53,6 +53,20 @@ export function getProjectAccentTone(project: ProjectEntry): AccentTone {
     return "red";
   }
 
+  if (
+    includesAny(haystack, [
+      "microcontrollers",
+      "embedded",
+      "avr",
+      "uart",
+      "eeprom",
+      "robotics",
+      "state-machines",
+    ])
+  ) {
+    return "blue";
+  }
+
   if (includesAny(haystack, ["geometry", "gtkmm", "fabrik", "c++", "oop", "game-architecture"])) {
     return "blue";
   }

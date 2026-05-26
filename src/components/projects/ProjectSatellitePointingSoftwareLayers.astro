@@ -1,0 +1,101 @@
+<figure class="not-prose satellite-layers surface-card" aria-labelledby="satellite-layers-title">
+  <figcaption>
+    <p class="kicker">Architecture logicielle</p>
+    <h3 id="satellite-layers-title">Deux couches, une frontière volontaire</h3>
+  </figcaption>
+
+  <div class="satellite-layers__stack" aria-label="Software layers">
+    <section>
+      <span>libs/</span>
+      <strong>Logique applicative</strong>
+      <p>FSM, modes, affichage, overlays et handlers partagés.</p>
+      <small>Ne manipulent presque pas les registres hardware.</small>
+    </section>
+
+    <div class="satellite-layers__arrow">
+      <span>primitives</span>
+    </div>
+
+    <section class="is-driver">
+      <span>drivers/</span>
+      <strong>Accès matériel</strong>
+      <p>LCD, servo, stepper, RC5, UART, EEPROM, timers et math bas niveau.</p>
+      <small>Exposent des fonctions réutilisables au reste du firmware.</small>
+    </section>
+  </div>
+</figure>
+
+<style>
+  .satellite-layers {
+    padding: 1.25rem;
+  }
+
+  .satellite-layers h3 {
+    margin: 0.45rem 0 0;
+    font-size: clamp(1.45rem, 2.4vw, 2rem);
+    line-height: 1.15;
+    color: rgb(var(--color-ink));
+  }
+
+  .satellite-layers__stack {
+    display: grid;
+    gap: 0.65rem;
+    margin-top: 1rem;
+  }
+
+  .satellite-layers__stack section {
+    border: 1px solid rgb(var(--color-line-strong));
+    background: rgb(var(--color-paper));
+    padding: 1.1rem;
+  }
+
+  .satellite-layers__stack section.is-driver {
+    background: rgb(var(--color-accent-soft));
+  }
+
+  .satellite-layers__stack span {
+    display: inline-flex;
+    border: 1px solid rgb(var(--color-line));
+    background: rgb(var(--color-paper-raised));
+    padding: 0.25rem 0.45rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.82rem;
+    color: rgb(var(--color-accent-deep));
+  }
+
+  .satellite-layers__stack strong {
+    display: block;
+    margin-top: 0.65rem;
+    font-size: 1.2rem;
+    color: rgb(var(--color-ink));
+  }
+
+  .satellite-layers__stack p,
+  .satellite-layers__stack small {
+    display: block;
+    margin-top: 0.45rem;
+    line-height: 1.6;
+    color: rgb(var(--color-ink-soft));
+  }
+
+  .satellite-layers__arrow {
+    display: grid;
+    place-items: center;
+    min-height: 2.4rem;
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    font-size: 0.66rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgb(var(--color-ink-faint));
+  }
+
+  .satellite-layers__arrow::before,
+  .satellite-layers__arrow::after {
+    content: "";
+    display: block;
+    width: 1px;
+    height: 0.9rem;
+    background: rgb(var(--color-line-strong));
+  }
+</style>

@@ -1,0 +1,241 @@
+<figure
+  class="not-prose satellite-architecture surface-card"
+  aria-labelledby="satellite-architecture-title"
+>
+  <figcaption class="satellite-architecture__header">
+    <p class="kicker">Schéma système</p>
+    <h3 id="satellite-architecture-title">Architecture embarquée du projet</h3>
+    <p>
+      Une lecture compacte du système : commandes RC5 ou UART, FSM à deux
+      couches, drivers bas niveau, affichage, persistance EEPROM et actionneurs
+      pour l&apos;azimut et l&apos;élévation.
+    </p>
+  </figcaption>
+
+  <div class="satellite-architecture__chips" aria-label="Project facts">
+    <span>ATmega128L @ 4 MHz</span>
+    <span>3 modes: MANUEL / AUTO / SCAN</span>
+    <span>INT7 + Timer2 + Timer1 PWM</span>
+  </div>
+
+  <div class="satellite-architecture__grid">
+    <section class="satellite-architecture__card" data-area="inputs">
+      <h4>Entrées utilisateur</h4>
+      <ul>
+        <li>télécommande IR RC5 sur PE7</li>
+        <li>terminal PC sur UART0</li>
+        <li>touches chiffres, GUIDE, AV, POWER</li>
+      </ul>
+    </section>
+
+    <div class="satellite-architecture__link" data-area="input-link">
+      <span>last_cmd + held_count</span>
+    </div>
+
+    <section class="satellite-architecture__card is-accent" data-area="core">
+      <h4>Cœur FSM</h4>
+      <ul>
+        <li>couche BROWSING / IN_MODE</li>
+        <li>dispatch par priorité</li>
+        <li>handlers AUTO, MANUEL, SCAN</li>
+      </ul>
+    </section>
+
+    <div class="satellite-architecture__link" data-area="core-output-link">
+      <span>commandes de mouvement</span>
+    </div>
+
+    <section class="satellite-architecture__card" data-area="outputs">
+      <h4>Actionneurs</h4>
+      <ul>
+        <li>stepper X27 sur PORTD[0:3]</li>
+        <li>servo S3003 sur PB5 / OC1A</li>
+        <li>buzzer piézo sur PE2</li>
+      </ul>
+    </section>
+
+    <section class="satellite-architecture__card" data-area="timing">
+      <h4>Temps et interruptions</h4>
+      <ul>
+        <li>INT7 capture une trame RC5</li>
+        <li>Timer2 décrémente les overlays à 1 ms</li>
+        <li>Timer1 génère le PWM servo en hardware</li>
+      </ul>
+    </section>
+
+    <div class="satellite-architecture__link satellite-architecture__link--vertical" data-area="timing-link">
+      <span>signaux et état</span>
+    </div>
+
+    <section class="satellite-architecture__card" data-area="display">
+      <h4>Affichage et retour</h4>
+      <ul>
+        <li>LCD HD44780 2x16 via XMEM</li>
+        <li>overlays temporises SAVED / DELETED</li>
+        <li>miroir VT100 sur UART</li>
+      </ul>
+    </section>
+
+    <section class="satellite-architecture__card" data-area="data">
+      <h4>Mémoire et données</h4>
+      <ul>
+        <li>32 slots EEPROM de 16 octets</li>
+        <li>cache SRAM pour le balayage SCAN</li>
+        <li>curseurs, cibles et position courante</li>
+      </ul>
+    </section>
+  </div>
+</figure>
+
+<style>
+  .satellite-architecture {
+    padding: 1.25rem;
+  }
+
+  .satellite-architecture__header h3 {
+    margin: 0.45rem 0 0;
+    font-size: clamp(1.45rem, 2.4vw, 2rem);
+    line-height: 1.15;
+    color: rgb(var(--color-ink));
+  }
+
+  .satellite-architecture__header p:last-child {
+    margin: 0.8rem 0 0;
+    max-width: 56rem;
+    line-height: 1.65;
+    color: rgb(var(--color-ink-soft));
+  }
+
+  .satellite-architecture__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+    margin-top: 1rem;
+  }
+
+  .satellite-architecture__chips span {
+    border: 1px solid rgb(var(--color-line));
+    background: rgb(var(--color-paper));
+    padding: 0.45rem 0.7rem;
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgb(var(--color-ink-faint));
+  }
+
+  .satellite-architecture__grid {
+    display: grid;
+    gap: 0.9rem;
+    margin-top: 1.25rem;
+    align-items: center;
+  }
+
+  .satellite-architecture__card {
+    border: 1px solid rgb(var(--color-line-strong));
+    background: rgb(var(--color-paper));
+    padding: 1rem 1.05rem;
+  }
+
+  .satellite-architecture__card.is-accent {
+    border-color: rgb(var(--color-line));
+    background: rgb(var(--color-accent-soft));
+  }
+
+  .satellite-architecture__card h4 {
+    margin: 0;
+    font-size: 1.08rem;
+    line-height: 1.2;
+    color: rgb(var(--color-ink));
+  }
+
+  .satellite-architecture__card ul {
+    margin: 0.8rem 0 0;
+    padding-left: 1.1rem;
+    color: rgb(var(--color-ink-soft));
+    line-height: 1.65;
+  }
+
+  .satellite-architecture__link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2rem;
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-align: center;
+    text-transform: uppercase;
+    color: rgb(var(--color-accent-deep));
+  }
+
+  .satellite-architecture__link span {
+    background: rgb(var(--color-paper-raised));
+    padding: 0.1rem 0.45rem;
+    margin: 0 0.45rem;
+  }
+
+  .satellite-architecture__link::before,
+  .satellite-architecture__link::after {
+    content: "";
+    display: block;
+    flex: 1;
+    height: 1px;
+    background: rgb(var(--color-line-strong));
+  }
+
+  .satellite-architecture__link--vertical {
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .satellite-architecture__link--vertical::before,
+  .satellite-architecture__link--vertical::after {
+    width: 1px;
+    height: 2.1rem;
+    flex: none;
+  }
+
+  .satellite-architecture__link--vertical span {
+    margin: 0;
+  }
+
+  @media (min-width: 860px) {
+    .satellite-architecture__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    [data-area="core"],
+    [data-area="display"] {
+      grid-column: 1 / -1;
+    }
+
+    .satellite-architecture__link {
+      min-height: 1.4rem;
+    }
+
+    .satellite-architecture__link--vertical {
+      flex-direction: row;
+    }
+
+    .satellite-architecture__link--vertical::before,
+    .satellite-architecture__link--vertical::after {
+      width: auto;
+      height: 1px;
+      flex: 1;
+    }
+  }
+
+  @media (max-width: 859px) {
+    .satellite-architecture__grid {
+      grid-template-columns: 1fr;
+    }
+
+    .satellite-architecture__link--vertical::before,
+    .satellite-architecture__link--vertical::after {
+      height: 1rem;
+    }
+  }
+</style>

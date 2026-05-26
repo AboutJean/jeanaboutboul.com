@@ -1,0 +1,1118 @@
+<section class="not-prose satellite-sim surface-card" data-satellite-sim>
+  <div class="satellite-sim__header">
+    <div>
+      <p class="kicker">Simulation interactive</p>
+      <h3>Station de pointage virtuelle</h3>
+    </div>
+    <p>
+      Une petite maquette web du firmware : télécommande RC5, couches
+      <code>BROWSING</code>/<code>IN_MODE</code>, mode MANUEL, Go-To AUTO,
+      sweep SCAN, LCD, UART et actionneurs.
+    </p>
+  </div>
+
+  <div class="satellite-sim__status" aria-label="État courant de la simulation">
+    <span>Mode <strong data-sim-output="mode">AUTO</strong></span>
+    <span>Couche <strong data-sim-output="layer">BROWSING</strong></span>
+    <span>Action <strong data-sim-output="action">IDLE</strong></span>
+    <span>UART <strong data-sim-output="uart">ON</strong></span>
+  </div>
+
+  <div class="satellite-sim__grid">
+    <div class="satellite-sim__column satellite-sim__column--hardware">
+      <article class="satellite-sim__module">
+        <h4>Servo élévation · PB5 / OC1A</h4>
+        <div class="satellite-sim__servo" aria-hidden="true">
+          <div class="satellite-sim__servo-body"></div>
+          <div class="satellite-sim__servo-arm" data-sim-output="servo-arm"></div>
+        </div>
+        <p>EL <strong data-sim-output="el">0°</strong> · PWM <strong data-sim-output="pwm">500</strong></p>
+      </article>
+
+      <article class="satellite-sim__module">
+        <h4>Stepper azimut · PORTD[0:3]</h4>
+        <div class="satellite-sim__stepper" aria-hidden="true">
+          <div class="satellite-sim__rotor" data-sim-output="stepper-rotor">
+            <span></span>
+          </div>
+        </div>
+        <p>AZ <strong data-sim-output="az">000°</strong> · <strong data-sim-output="partial-steps">0</strong> pas partiels</p>
+      </article>
+
+      <article class="satellite-sim__module satellite-sim__module--buzzer" data-sim-output="buzzer">
+        <h4>IR + buzzer · PE7 / PE2</h4>
+        <div class="satellite-sim__ir-row">
+          <span class="satellite-sim__led" data-sim-output="rx-led"></span>
+          <div class="satellite-sim__buzzer" aria-hidden="true"><span></span></div>
+        </div>
+        <p>Dernière commande <strong data-sim-output="last-command">INIT</strong></p>
+      </article>
+    </div>
+
+    <div class="satellite-sim__column satellite-sim__column--core">
+      <article class="satellite-sim__board">
+        <div class="satellite-sim__trace satellite-sim__trace--a"></div>
+        <div class="satellite-sim__trace satellite-sim__trace--b"></div>
+        <div class="satellite-sim__chip">
+          <span class="satellite-sim__chip-led" data-sim-output="mcu-led"></span>
+          <strong>ATmega128L</strong>
+          <small>4 MHz · FSM coopérative</small>
+        </div>
+      </article>
+
+      <article class="satellite-sim__lcd-card">
+        <h4>LCD HD44780 · XMEM</h4>
+        <div class="satellite-sim__lcd" aria-label="LCD 16 par 2">
+          <span data-sim-output="lcd-l1">MODE: AUTO</span>
+          <span data-sim-output="lcd-l2">AZ:000 EL:000</span>
+        </div>
+      </article>
+
+      <article class="satellite-sim__module">
+        <h4>EEPROM / sélection</h4>
+        <p>
+          Slot <strong data-sim-output="slot">0</strong> ·
+          <strong data-sim-output="satellite">ISS</strong>
+        </p>
+        <p>
+          Slots valides <strong data-sim-output="valid-slots">10/32</strong> ·
+          Hits SCAN <strong data-sim-output="scan-hits">0</strong>
+        </p>
+      </article>
+
+      <article class="satellite-sim__terminal-card">
+        <h4>UART terminal · 19 200 bps</h4>
+        <pre data-sim-output="uart-term">System init... OK
+FSM ready.</pre>
+      </article>
+    </div>
+
+    <div class="satellite-sim__remote" aria-label="Télécommande RC5 simulée">
+      <div class="satellite-sim__tx-led" data-sim-output="tx-led"></div>
+      <div class="satellite-sim__remote-title">Vivanco UR Z2 · RC5</div>
+
+      <div class="satellite-sim__remote-row">
+        <button type="button" class="is-dark is-pill" data-sim-cmd="AV">AV</button>
+        <button type="button" class="is-red is-pill" data-sim-cmd="POWER">POWER</button>
+      </div>
+
+      <div class="satellite-sim__remote-pad">
+        <div class="satellite-sim__remote-stack">
+          <button type="button" class="is-red" data-sim-hold="VOL+">+</button>
+          <span>VOL</span>
+          <button type="button" class="is-red" data-sim-hold="VOL-">-</button>
+        </div>
+        <div class="satellite-sim__remote-stack">
+          <button type="button" class="is-dark is-small" data-sim-cmd="MUTE">M</button>
+          <span>MUTE</span>
+        </div>
+        <div class="satellite-sim__remote-stack">
+          <button type="button" class="is-red" data-sim-hold="CH+">▲</button>
+          <span>CH</span>
+          <button type="button" class="is-red" data-sim-hold="CH-">▼</button>
+        </div>
+      </div>
+
+      <button type="button" class="is-blue is-wide" data-sim-cmd="GUIDE">GUIDE</button>
+
+      <div class="satellite-sim__numpad">
+        <button type="button" class="is-blue" data-sim-cmd="1">1</button>
+        <button type="button" class="is-blue" data-sim-cmd="2">2</button>
+        <button type="button" class="is-blue" data-sim-cmd="3">3</button>
+        <button type="button" class="is-blue" data-sim-cmd="4">4</button>
+        <button type="button" class="is-blue" data-sim-cmd="5">5</button>
+        <button type="button" class="is-blue" data-sim-cmd="6">6</button>
+        <button type="button" class="is-blue" data-sim-cmd="7">7</button>
+        <button type="button" class="is-blue" data-sim-cmd="8">8</button>
+        <button type="button" class="is-blue" data-sim-cmd="9">9</button>
+        <button type="button" class="is-blue is-text" data-sim-cmd="DEL">DEL</button>
+        <button type="button" class="is-blue" data-sim-cmd="0">0</button>
+        <button type="button" class="is-blue is-text" data-sim-cmd="RESET">RST</button>
+      </div>
+
+      <p class="satellite-sim__hint">
+        Astuce : maintiens <code>CH</code> ou <code>VOL</code> pour voir
+        l'accélération RC5. <code>POWER</code> interrompt tout mouvement.
+      </p>
+    </div>
+  </div>
+</section>
+
+<script is:inline>
+  function initSatellitePointingSimulator(root) {
+    if (root.dataset.ready === "true") return;
+    root.dataset.ready = "true";
+
+    const q = (selector) => root.querySelector(selector);
+    const qa = (selector) => Array.from(root.querySelectorAll(selector));
+    const out = (name) => q(`[data-sim-output="${name}"]`);
+
+    const LAYER_BROWSING = 0;
+    const LAYER_IN_MODE = 1;
+    const MODE_AUTO = 0;
+    const MODE_MANUEL = 1;
+    const MODE_SCAN = 2;
+    const MODE_NAMES = ["AUTO", "MANUEL", "SCAN"];
+
+    const initialSatellites = [
+      ["ISS", 257, 24],
+      ["Hubble", 142, 56],
+      ["Tiangong", 89, 72],
+      ["Starlink", 310, 45],
+      ["Envisat", 15, 81],
+      ["NOAA-19", 198, 33],
+      ["Iridium", 275, 65],
+      ["Terra", 45, 12],
+      ["Aqua", 120, 88],
+      ["Suomi NPP", 82, 41],
+    ];
+
+    let audioCtx = null;
+    let holdTimer = null;
+    let overlayTimer = null;
+
+    const state = {
+      az: 0,
+      el: 0,
+      layer: LAYER_BROWSING,
+      mode: MODE_AUTO,
+      moving: false,
+      phase: "idle",
+      targetAz: 0,
+      targetEl: 0,
+      satCursor: 0,
+      manualConfirmSave: false,
+      autoConfirmDelete: false,
+      uartEnabled: true,
+      overlay: "",
+      scanSteps: 0,
+      scanHits: [],
+      scanFilter: null,
+      scanElAtStart: 0,
+      lastCommand: "INIT",
+      holdCount: 0,
+      satellites: Array.from({ length: 32 }, (_, index) => {
+        const sat = initialSatellites[index];
+        return sat
+          ? { name: sat[0], az: sat[1], el: sat[2], valid: true }
+          : { name: `SAT ${String(index).padStart(2, "0")}`, az: 0, el: 0, valid: false };
+      }),
+    };
+
+    function pad(value, length = 3) {
+      return String(value).padStart(length, "0");
+    }
+
+    function lcdLine(value) {
+      return String(value).padEnd(16, " ").slice(0, 16);
+    }
+
+    function wrapAz(value) {
+      return ((value % 360) + 360) % 360;
+    }
+
+    function clamp(value, min, max) {
+      return Math.min(max, Math.max(min, value));
+    }
+
+    function shortestDelta(current, target) {
+      let delta = target - current;
+      if (delta > 180) delta -= 360;
+      if (delta < -180) delta += 360;
+      return delta;
+    }
+
+    function validSlotIds() {
+      const base = state.satellites
+        .map((sat, id) => (sat.valid ? id : -1))
+        .filter((id) => id >= 0);
+      return state.scanFilter ? base.filter((id) => state.scanFilter.includes(id)) : base;
+    }
+
+    function currentSat() {
+      return state.satellites[state.satCursor];
+    }
+
+    function firstValidSlot() {
+      return validSlotIds()[0] ?? -1;
+    }
+
+    function stepCursor(direction) {
+      const ids = validSlotIds();
+      if (ids.length === 0) return;
+      const currentIndex = Math.max(0, ids.indexOf(state.satCursor));
+      state.satCursor = ids[(currentIndex + direction + ids.length) % ids.length];
+    }
+
+    function selectDirectSlot(cmd) {
+      const slot = cmd === "0" ? 9 : Number(cmd) - 1;
+      if (!Number.isInteger(slot)) return;
+      const sat = state.satellites[slot];
+      if (sat?.valid && (!state.scanFilter || state.scanFilter.includes(slot))) {
+        state.satCursor = slot;
+        logUART(`[AUTO] direct slot ${slot}: ${sat.name}`);
+      } else {
+        showOverlay("SLOT EMPTY");
+      }
+    }
+
+    function setOverlay(message, ms = 650) {
+      state.overlay = message;
+      clearTimeout(overlayTimer);
+      overlayTimer = setTimeout(() => {
+        state.overlay = "";
+        render();
+      }, ms);
+      render();
+    }
+
+    function logUART(message) {
+      if (!state.uartEnabled) return;
+      const term = out("uart-term");
+      if (!term) return;
+      const time = new Date().toLocaleTimeString("fr-CH", {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+      });
+      term.textContent += `\n[${time}] ${message}`;
+      term.scrollTop = term.scrollHeight;
+    }
+
+    function flash(element) {
+      if (!element) return;
+      element.classList.remove("is-flashing");
+      void element.offsetWidth;
+      element.classList.add("is-flashing");
+      setTimeout(() => element.classList.remove("is-flashing"), 180);
+    }
+
+    function chirp(count = 1) {
+      const buzzer = out("buzzer");
+      buzzer?.classList.add("is-buzzing");
+      setTimeout(() => buzzer?.classList.remove("is-buzzing"), 160 * count);
+
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContext) return;
+      if (!audioCtx) audioCtx = new AudioContext();
+      if (audioCtx.state === "suspended") audioCtx.resume();
+
+      for (let i = 0; i < count; i += 1) {
+        const start = audioCtx.currentTime + i * 0.13;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = "square";
+        osc.frequency.setValueAtTime(1500, start);
+        osc.frequency.exponentialRampToValueAtTime(1000, start + 0.07);
+        gain.gain.setValueAtTime(0.035, start);
+        gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.08);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(start);
+        osc.stop(start + 0.08);
+      }
+    }
+
+    function computeLcd() {
+      let l1 = "";
+      let l2 = `AZ:${pad(state.az)} EL:${pad(state.el)}`;
+
+      if (state.layer === LAYER_BROWSING) {
+        l1 = `MODE: ${MODE_NAMES[state.mode]}`;
+      } else if (state.mode === MODE_AUTO) {
+        const sat = currentSat();
+        if (state.autoConfirmDelete) {
+          l1 = "DEL? PUSH DEL";
+        } else if (sat?.valid) {
+          l1 = state.moving ? `GO TO ${sat.name}` : `Sat: ${sat.name}`;
+          l2 = `AZ:${pad(sat.az)} EL:${pad(sat.el)}`;
+        } else {
+          l1 = "EMPTY";
+        }
+      } else if (state.mode === MODE_MANUEL) {
+        l1 = state.manualConfirmSave ? "SAVE:PRESS GDE" : "MANUEL MOVING";
+      } else if (state.mode === MODE_SCAN) {
+        if (state.moving) {
+          l1 = "SCAN: SWEEPING";
+          l2 = `AZ:${pad(state.az)} HIT:${pad(state.scanHits.length, 2)}`;
+        } else {
+          l1 = "SCAN:PUSH GUIDE";
+        }
+      }
+
+      if (state.overlay) l2 = state.overlay;
+      return [lcdLine(l1), lcdLine(l2)];
+    }
+
+    function render() {
+      const [l1, l2] = computeLcd();
+      out("lcd-l1").textContent = l1;
+      out("lcd-l2").textContent = l2;
+
+      out("az").textContent = `${pad(state.az)}°`;
+      out("el").textContent = `${state.el}°`;
+      out("pwm").textContent = String(Math.round(500 + (state.el * 400) / 90));
+      out("partial-steps").textContent = String(state.az * 3);
+      out("mode").textContent = MODE_NAMES[state.mode];
+      out("layer").textContent = state.layer === LAYER_BROWSING ? "BROWSING" : "IN_MODE";
+      out("action").textContent = state.moving ? state.phase.toUpperCase() : "IDLE";
+      out("uart").textContent = state.uartEnabled ? "ON" : "OFF";
+      out("last-command").textContent = state.lastCommand;
+      out("slot").textContent = String(state.satCursor);
+      out("satellite").textContent = currentSat()?.valid ? currentSat().name : "EMPTY";
+      out("valid-slots").textContent =
+        `${state.satellites.filter((sat) => sat.valid).length}/32`;
+      out("scan-hits").textContent = String(state.scanHits.length);
+
+      out("stepper-rotor").style.transform = `rotate(${state.az}deg)`;
+      out("servo-arm").style.transform = `rotate(${-90 + state.el}deg)`;
+      out("mcu-led").classList.toggle("is-moving", state.moving);
+      root.classList.toggle("is-moving", state.moving);
+      root.classList.toggle("is-filtered", Boolean(state.scanFilter));
+
+      qa("[data-sim-cmd], [data-sim-hold]").forEach((button) => {
+        const disabled = state.moving && !["POWER", "MUTE"].includes(button.dataset.simCmd);
+        button.toggleAttribute("aria-disabled", disabled);
+      });
+    }
+
+    function resetSimulation() {
+      state.az = 0;
+      state.el = 0;
+      state.layer = LAYER_BROWSING;
+      state.mode = MODE_AUTO;
+      state.moving = false;
+      state.phase = "idle";
+      state.satCursor = 0;
+      state.manualConfirmSave = false;
+      state.autoConfirmDelete = false;
+      state.overlay = "";
+      state.scanSteps = 0;
+      state.scanHits = [];
+      state.scanFilter = null;
+      state.lastCommand = "RESET";
+      clearTimeout(overlayTimer);
+      out("uart-term").textContent = "System reset... OK\nFSM ready.";
+      render();
+      logUART("[SYS] reset");
+    }
+
+    function emergencyStop() {
+      state.moving = false;
+      state.phase = "idle";
+      state.layer = LAYER_BROWSING;
+      state.manualConfirmSave = false;
+      state.autoConfirmDelete = false;
+      state.scanFilter = null;
+      state.overlay = "";
+      clearTimeout(overlayTimer);
+      chirp(2);
+      logUART("[SYS] EMERGENCY STOP");
+      render();
+    }
+
+    function handleManual(cmd) {
+      if (state.manualConfirmSave) {
+        state.manualConfirmSave = false;
+        if (cmd === "GUIDE") {
+          const freeSlot = state.satellites.findIndex((sat) => !sat.valid);
+          if (freeSlot >= 0) {
+            state.satellites[freeSlot] = {
+              name: `SAT ${String(freeSlot).padStart(2, "0")}`,
+              az: state.az,
+              el: state.el,
+              valid: true,
+            };
+            state.satCursor = freeSlot;
+            setOverlay("SAVED");
+            chirp(1);
+            logUART(`[EEPROM] saved slot ${freeSlot} AZ:${state.az} EL:${state.el}`);
+          } else {
+            setOverlay("EEPROM FULL");
+          }
+        }
+        render();
+        return;
+      }
+
+      const fastness = state.holdCount >= 30 ? 10 : state.holdCount >= 10 ? 5 : 1;
+      const elStep = fastness === 1 ? 2 : fastness;
+      let moved = false;
+
+      if (cmd === "CH+") {
+        state.az = wrapAz(state.az + fastness);
+        moved = true;
+      } else if (cmd === "CH-") {
+        state.az = wrapAz(state.az - fastness);
+        moved = true;
+      } else if (cmd === "VOL+") {
+        state.el = clamp(state.el + elStep, 0, 90);
+        moved = true;
+      } else if (cmd === "VOL-") {
+        state.el = clamp(state.el - elStep, 0, 90);
+        moved = true;
+      } else if (cmd === "GUIDE") {
+        state.manualConfirmSave = true;
+        logUART("[MANUEL] save armed");
+      }
+
+      if (moved) logUART(`[MANUEL] AZ:${state.az} EL:${state.el}`);
+      render();
+    }
+
+    function handleAuto(cmd) {
+      if (state.autoConfirmDelete) {
+        state.autoConfirmDelete = false;
+        if (cmd === "DEL" && currentSat()?.valid) {
+          const deleted = currentSat().name;
+          state.satellites[state.satCursor].valid = false;
+          state.scanFilter = state.scanFilter?.filter((id) => id !== state.satCursor) ?? null;
+          const next = firstValidSlot();
+          if (next >= 0) state.satCursor = next;
+          setOverlay("DELETED");
+          chirp(1);
+          logUART(`[EEPROM] deleted ${deleted}`);
+        }
+        render();
+        return;
+      }
+
+      if (cmd === "CH+") {
+        stepCursor(1);
+      } else if (cmd === "CH-") {
+        stepCursor(-1);
+      } else if (/^[0-9]$/.test(cmd)) {
+        selectDirectSlot(cmd);
+      } else if (cmd === "DEL") {
+        if (currentSat()?.valid) state.autoConfirmDelete = true;
+      } else if (cmd === "GUIDE") {
+        const sat = currentSat();
+        if (!sat?.valid) {
+          setOverlay("NO SAT");
+          return;
+        }
+        state.targetAz = sat.az;
+        state.targetEl = sat.el;
+        state.moving = true;
+        state.phase = "auto-az";
+        logUART(`[AUTO] Go-To ${sat.name} AZ:${sat.az} EL:${sat.el}`);
+      }
+
+      render();
+    }
+
+    function handleScan(cmd) {
+      if (cmd !== "GUIDE") return;
+      state.scanSteps = 0;
+      state.scanHits = [];
+      state.scanFilter = null;
+      state.scanElAtStart = state.el;
+      state.moving = true;
+      state.phase = "scan";
+      logUART(`[SCAN] sweep start at EL:${state.el}`);
+      render();
+    }
+
+    function dispatch(cmd, options = {}) {
+      state.lastCommand = cmd;
+      if (!options.repeat) state.holdCount = 0;
+      flash(out("tx-led"));
+      flash(out("rx-led"));
+
+      if (cmd === "RESET") {
+        resetSimulation();
+        return;
+      }
+
+      if (cmd === "POWER") {
+        emergencyStop();
+        return;
+      }
+
+      if (cmd === "MUTE") {
+        state.uartEnabled = !state.uartEnabled;
+        setOverlay(state.uartEnabled ? "UART ON" : "UART OFF");
+        if (state.uartEnabled) logUART("[SYS] UART enabled");
+        render();
+        return;
+      }
+
+      if (state.moving) {
+        logUART(`[FSM] ignored ${cmd} while moving`);
+        return;
+      }
+
+      if (cmd === "AV") {
+        state.layer = state.layer === LAYER_BROWSING ? LAYER_IN_MODE : LAYER_BROWSING;
+        state.manualConfirmSave = false;
+        state.autoConfirmDelete = false;
+        chirp(1);
+        logUART(`[FSM] layer ${state.layer === LAYER_BROWSING ? "BROWSING" : "IN_MODE"}`);
+        render();
+        return;
+      }
+
+      if (state.layer === LAYER_BROWSING) {
+        if (cmd === "CH+") state.mode = (state.mode + 1) % 3;
+        if (cmd === "CH-") state.mode = (state.mode + 2) % 3;
+        if (cmd === "CH+" || cmd === "CH-") {
+          state.scanFilter = null;
+          logUART(`[FSM] mode ${MODE_NAMES[state.mode]}`);
+        }
+        render();
+        return;
+      }
+
+      if (state.mode === MODE_MANUEL) handleManual(cmd);
+      if (state.mode === MODE_AUTO) handleAuto(cmd);
+      if (state.mode === MODE_SCAN) handleScan(cmd);
+    }
+
+    function tickAuto() {
+      if (state.phase === "auto-az") {
+        const delta = shortestDelta(state.az, state.targetAz);
+        if (delta === 0) {
+          state.phase = "auto-el";
+          return;
+        }
+        const step = Math.sign(delta) * Math.min(2, Math.abs(delta));
+        state.az = wrapAz(state.az + step);
+      } else if (state.phase === "auto-el") {
+        const delta = state.targetEl - state.el;
+        if (delta === 0) {
+          state.moving = false;
+          state.phase = "idle";
+          setOverlay("ARRIVED", 900);
+          chirp(1);
+          logUART("[AUTO] arrived");
+          return;
+        }
+        state.el += Math.sign(delta) * Math.min(2, Math.abs(delta));
+      }
+    }
+
+    function tickScan() {
+      for (let i = 0; i < 2 && state.scanSteps < 360; i += 1) {
+        state.az = wrapAz(state.az + 1);
+        state.scanSteps += 1;
+        state.satellites.forEach((sat, id) => {
+          if (!sat.valid || state.scanHits.includes(id)) return;
+          if (sat.az === state.az && Math.abs(sat.el - state.scanElAtStart) <= 10) {
+            state.scanHits.push(id);
+            chirp(1);
+            logUART(`[SCAN] hit ${sat.name}`);
+          }
+        });
+      }
+
+      if (state.scanSteps >= 360) {
+        state.moving = false;
+        state.phase = "idle";
+        if (state.scanHits.length > 0) {
+          state.scanFilter = [...state.scanHits];
+          state.mode = MODE_AUTO;
+          state.layer = LAYER_IN_MODE;
+          state.satCursor = state.scanFilter[0];
+          setOverlay(`${state.scanHits.length} SATS FOUND`, 1300);
+          logUART(`[SCAN] ${state.scanHits.length} result(s), AUTO filtered`);
+        } else {
+          setOverlay("NO SATS FOUND", 1300);
+          logUART("[SCAN] no result");
+        }
+        chirp(2);
+      }
+    }
+
+    function mainLoop() {
+      if (!state.moving) return;
+      if (state.phase.startsWith("auto")) tickAuto();
+      if (state.phase === "scan") tickScan();
+      render();
+    }
+
+    qa("[data-sim-cmd]").forEach((button) => {
+      button.addEventListener("click", () => dispatch(button.dataset.simCmd));
+    });
+
+    qa("[data-sim-hold]").forEach((button) => {
+      const cmd = button.dataset.simHold;
+      const stopHold = () => {
+        clearInterval(holdTimer);
+        holdTimer = null;
+      };
+      button.addEventListener("pointerdown", (event) => {
+        event.preventDefault();
+        stopHold();
+        state.holdCount = 0;
+        dispatch(cmd);
+        holdTimer = setInterval(() => {
+          state.holdCount += 1;
+          dispatch(cmd, { repeat: true });
+        }, 115);
+      });
+      button.addEventListener("pointerup", stopHold);
+      button.addEventListener("pointerleave", stopHold);
+      button.addEventListener("pointercancel", stopHold);
+    });
+
+    root.addEventListener("keydown", (event) => {
+      const keyMap = {
+        a: "CH+",
+        d: "CH-",
+        w: "VOL+",
+        s: "VOL-",
+        m: "AV",
+        p: "POWER",
+        x: "DEL",
+        u: "MUTE",
+        " ": "GUIDE",
+      };
+      const key = event.key.toLowerCase();
+      const cmd = keyMap[key] || (/^[0-9]$/.test(key) ? key : null);
+      if (!cmd) return;
+      event.preventDefault();
+      dispatch(cmd);
+    });
+
+    root.tabIndex = 0;
+    setInterval(mainLoop, 34);
+    render();
+  }
+
+  document
+    .querySelectorAll("[data-satellite-sim]")
+    .forEach(initSatellitePointingSimulator);
+</script>
+
+<style>
+  .satellite-sim {
+    padding: 1.25rem;
+  }
+
+  .satellite-sim__header {
+    display: grid;
+    gap: 0.8rem;
+  }
+
+  .satellite-sim__header h3 {
+    margin: 0.45rem 0 0;
+    font-size: clamp(1.65rem, 3vw, 2.35rem);
+    line-height: 1.05;
+    color: rgb(var(--color-ink));
+  }
+
+  .satellite-sim__header p:last-child {
+    margin: 0;
+    max-width: 58rem;
+    line-height: 1.65;
+    color: rgb(var(--color-ink-soft));
+  }
+
+  .satellite-sim__status {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+    margin-top: 1rem;
+  }
+
+  .satellite-sim__status span {
+    border: 1px solid rgb(var(--color-line));
+    background: rgb(var(--color-paper));
+    padding: 0.45rem 0.65rem;
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: rgb(var(--color-ink-faint));
+  }
+
+  .satellite-sim__status strong {
+    color: rgb(var(--color-accent-deep));
+  }
+
+  .satellite-sim__grid {
+    display: grid;
+    gap: 1rem;
+    margin-top: 1.2rem;
+  }
+
+  .satellite-sim__column {
+    display: grid;
+    gap: 1rem;
+    align-content: start;
+  }
+
+  .satellite-sim__module,
+  .satellite-sim__lcd-card,
+  .satellite-sim__terminal-card,
+  .satellite-sim__board,
+  .satellite-sim__remote {
+    border: 1px solid rgb(var(--color-line-strong));
+    background: rgb(var(--color-paper));
+  }
+
+  .satellite-sim__module,
+  .satellite-sim__lcd-card,
+  .satellite-sim__terminal-card {
+    padding: 0.95rem;
+  }
+
+  .satellite-sim h4,
+  .satellite-sim__remote-title {
+    margin: 0 0 0.8rem;
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    font-size: 0.68rem;
+    font-weight: 900;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgb(var(--color-ink-faint));
+  }
+
+  .satellite-sim__module p {
+    margin: 0.7rem 0 0;
+    line-height: 1.45;
+    color: rgb(var(--color-ink-soft));
+  }
+
+  .satellite-sim__servo {
+    position: relative;
+    height: 7rem;
+  }
+
+  .satellite-sim__servo-body {
+    position: absolute;
+    bottom: 0.6rem;
+    left: 50%;
+    width: 5rem;
+    height: 3.5rem;
+    transform: translateX(-50%);
+    border: 1px solid rgb(var(--color-line));
+    background: rgb(var(--color-line));
+  }
+
+  .satellite-sim__servo-arm {
+    position: absolute;
+    bottom: 3.45rem;
+    left: 50%;
+    width: 4.6rem;
+    height: 0.55rem;
+    transform-origin: 0 50%;
+    border: 1px solid rgb(var(--color-line));
+    background: rgb(var(--color-accent));
+    transition: transform 90ms steps(2, end);
+  }
+
+  .satellite-sim__stepper {
+    display: grid;
+    min-height: 7rem;
+    place-items: center;
+  }
+
+  .satellite-sim__rotor {
+    position: relative;
+    width: 5.2rem;
+    height: 5.2rem;
+    border: 1px solid rgb(var(--color-line));
+    border-radius: 50%;
+    background:
+      radial-gradient(circle, rgb(var(--color-paper)) 0 32%, transparent 33%),
+      conic-gradient(from 0deg, rgb(var(--color-accent-soft)), rgb(var(--color-paper-raised)), rgb(var(--color-accent-soft)));
+    transition: transform 80ms steps(2, end);
+  }
+
+  .satellite-sim__rotor span {
+    position: absolute;
+    top: 0.25rem;
+    left: 50%;
+    width: 0.35rem;
+    height: 1.45rem;
+    transform: translateX(-50%);
+    background: rgb(var(--color-accent-deep));
+  }
+
+  .satellite-sim__ir-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    min-height: 5.5rem;
+  }
+
+  .satellite-sim__led,
+  .satellite-sim__tx-led,
+  .satellite-sim__chip-led {
+    display: inline-block;
+    border-radius: 999px;
+    background: rgb(var(--color-ink-faint));
+  }
+
+  .satellite-sim__led {
+    width: 0.8rem;
+    height: 0.8rem;
+    box-shadow: inset 0 0 0 1px rgb(var(--color-line));
+  }
+
+  .satellite-sim__led.is-flashing,
+  .satellite-sim__tx-led.is-flashing {
+    background: rgb(var(--color-accent-deep));
+    box-shadow: 0 0 0.8rem rgba(var(--color-accent-deep), 0.9);
+  }
+
+  .satellite-sim__buzzer {
+    display: grid;
+    width: 4.4rem;
+    height: 4.4rem;
+    place-items: center;
+    border: 1px solid rgb(var(--color-line));
+    border-radius: 50%;
+    background: radial-gradient(circle, rgb(var(--color-ink)) 0 28%, rgb(var(--color-line)) 100%);
+  }
+
+  .satellite-sim__buzzer span {
+    width: 1rem;
+    height: 1rem;
+    border-radius: 50%;
+    background: rgb(var(--color-paper));
+  }
+
+  .satellite-sim__module--buzzer.is-buzzing .satellite-sim__buzzer {
+    animation: satellite-sim-shake 90ms linear infinite;
+  }
+
+  .satellite-sim__board {
+    position: relative;
+    display: grid;
+    min-height: 14rem;
+    place-items: center;
+    overflow: hidden;
+    background:
+      linear-gradient(90deg, rgba(var(--color-line), 0.22) 1px, transparent 1px),
+      linear-gradient(0deg, rgba(var(--color-line), 0.18) 1px, transparent 1px),
+      rgb(var(--color-accent-soft));
+    background-size: 1.4rem 1.4rem;
+  }
+
+  .satellite-sim__trace {
+    position: absolute;
+    inset: auto 1rem;
+    height: 1px;
+    background: rgb(var(--color-line));
+  }
+
+  .satellite-sim__trace--a { top: 28%; }
+  .satellite-sim__trace--b { bottom: 26%; }
+
+  .satellite-sim__chip {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    width: min(13rem, 75%);
+    min-height: 7.8rem;
+    place-items: center;
+    border: 1px solid rgb(var(--color-paper-contrast));
+    background: rgb(var(--color-line));
+    color: rgb(var(--color-paper-contrast));
+    text-align: center;
+  }
+
+  .satellite-sim__chip strong {
+    color: rgb(var(--color-paper-contrast));
+    font-size: clamp(1.3rem, 3vw, 1.9rem);
+  }
+
+  .satellite-sim__chip small {
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    font-size: 0.65rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .satellite-sim__chip-led {
+    position: absolute;
+    top: 0.65rem;
+    right: 0.65rem;
+    width: 0.7rem;
+    height: 0.7rem;
+    background: rgb(var(--color-accent-deep));
+  }
+
+  .satellite-sim__chip-led.is-moving {
+    background: rgb(var(--color-accent));
+    box-shadow: 0 0 0.75rem rgba(var(--color-accent), 0.85);
+  }
+
+  .satellite-sim__lcd {
+    display: grid;
+    gap: 0.25rem;
+    border: 0.55rem solid rgb(var(--color-line));
+    background:
+      linear-gradient(90deg, rgba(255, 255, 255, 0.13), transparent 22%),
+      #9aa648;
+    padding: 0.85rem 1rem;
+  }
+
+  .satellite-sim__lcd span {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: clamp(1.1rem, 3vw, 1.45rem);
+    font-weight: 900;
+    letter-spacing: 0.05em;
+    line-height: 1.08;
+    color: #182011;
+    white-space: pre;
+  }
+
+  .satellite-sim__terminal-card pre {
+    min-height: 8rem;
+    max-height: 11rem;
+    overflow: auto;
+    margin: 0;
+    border: 1px solid rgb(var(--color-line));
+    background: rgb(var(--color-line));
+    padding: 0.85rem;
+    color: rgb(var(--color-accent-soft));
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.78rem;
+    line-height: 1.55;
+    white-space: pre-wrap;
+  }
+
+  .satellite-sim__remote {
+    position: relative;
+    display: grid;
+    gap: 0.85rem;
+    align-content: start;
+    justify-items: center;
+    padding: 1.25rem 1rem;
+    border-radius: 2.2rem;
+    background:
+      linear-gradient(135deg, rgba(255, 255, 255, 0.4), transparent 42%),
+      rgb(var(--color-paper-raised));
+  }
+
+  .satellite-sim__tx-led {
+    width: 0.9rem;
+    height: 0.9rem;
+    background: rgb(var(--color-line));
+  }
+
+  .satellite-sim__remote-row,
+  .satellite-sim__remote-pad {
+    display: flex;
+    gap: 0.8rem;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .satellite-sim__remote-pad {
+    border: 1px solid rgb(var(--color-line));
+    background: rgb(var(--color-paper));
+    padding: 0.85rem 0.45rem;
+  }
+
+  .satellite-sim__remote-stack {
+    display: grid;
+    gap: 0.25rem;
+    justify-items: center;
+  }
+
+  .satellite-sim__remote-stack span,
+  .satellite-sim__hint {
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    font-size: 0.63rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgb(var(--color-ink-faint));
+  }
+
+  .satellite-sim button {
+    display: inline-grid;
+    min-width: 2.45rem;
+    height: 2.45rem;
+    place-items: center;
+    border: 1px solid rgb(var(--color-line));
+    border-radius: 999px;
+    color: rgb(var(--color-paper-contrast));
+    cursor: pointer;
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    font-size: 0.72rem;
+    font-weight: 900;
+    letter-spacing: 0.05em;
+    transition: transform 80ms ease, filter 120ms ease;
+  }
+
+  .satellite-sim button:hover {
+    filter: brightness(1.08);
+  }
+
+  .satellite-sim button:active {
+    transform: translateY(2px);
+  }
+
+  .satellite-sim button[aria-disabled="true"] {
+    cursor: not-allowed;
+    opacity: 0.48;
+  }
+
+  .satellite-sim button.is-red { background: rgb(var(--color-accent)); }
+  .satellite-sim button.is-blue { background: rgb(var(--color-accent-deep)); }
+  .satellite-sim button.is-dark { background: rgb(var(--color-line)); }
+  .satellite-sim button.is-pill {
+    min-width: 4.8rem;
+    height: 2rem;
+    border-radius: 999px;
+  }
+  .satellite-sim button.is-small {
+    min-width: 2rem;
+    width: 2rem;
+    height: 2rem;
+  }
+  .satellite-sim button.is-wide {
+    min-width: 6rem;
+    height: 2.15rem;
+    border-radius: 999px;
+  }
+  .satellite-sim button.is-text {
+    font-size: 0.62rem;
+  }
+
+  .satellite-sim__numpad {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.55rem;
+  }
+
+  .satellite-sim__hint {
+    margin: 0;
+    max-width: 16rem;
+    line-height: 1.5;
+    text-align: center;
+  }
+
+  .satellite-sim.is-filtered [data-sim-output="satellite"]::after {
+    content: " · filtre SCAN";
+    color: rgb(var(--color-accent-deep));
+  }
+
+  @keyframes satellite-sim-shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-2px); }
+    75% { transform: translateX(2px); }
+  }
+
+  @media (min-width: 960px) {
+    .satellite-sim__grid {
+      grid-template-columns: minmax(10rem, 0.75fr) minmax(18rem, 1.25fr) minmax(13rem, 0.8fr);
+    }
+  }
+
+  @media (max-width: 959px) {
+    .satellite-sim__remote {
+      max-width: 24rem;
+      justify-self: center;
+    }
+  }
+</style>

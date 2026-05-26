@@ -1,0 +1,265 @@
+<figure class="not-prose satellite-fsm surface-card" aria-labelledby="satellite-fsm-title">
+  <figcaption class="satellite-fsm__header">
+    <p class="kicker">Machine à états</p>
+    <h3 id="satellite-fsm-title">Deux couches pour garder le firmware lisible</h3>
+    <p>
+      La couche <strong>BROWSING</strong> choisit le mode actif. La couche
+      <strong>IN_MODE</strong> délègue ensuite les touches au handler du mode
+      courant. <code>POWER</code> reste prioritaire partout.
+    </p>
+  </figcaption>
+
+  <div class="satellite-fsm__layers" aria-label="Navigation layer">
+    <article>
+      <span>Couche 1</span>
+      <strong>BROWSING</strong>
+      <p><code>CH+</code>/<code>CH-</code> font défiler AUTO, MANUEL et SCAN.</p>
+    </article>
+
+    <div class="satellite-fsm__bridge">
+      <span>AV</span>
+      <small>entrer / sortir</small>
+    </div>
+
+    <article>
+      <span>Couche 2</span>
+      <strong>IN_MODE</strong>
+      <p>Les commandes sont interprétées par le mode sélectionné.</p>
+    </article>
+  </div>
+
+  <div class="satellite-fsm__modes" aria-label="Mode substates">
+    <section class="satellite-fsm__mode">
+      <h4>AUTO</h4>
+      <ol>
+        <li><span>Browse sat</span></li>
+        <li><span>Moving AZ</span></li>
+        <li><span>Moving EL</span></li>
+        <li><span>Arrived</span></li>
+      </ol>
+      <p><code>DEL</code> ouvre une branche de confirmation avant suppression.</p>
+    </section>
+
+    <section class="satellite-fsm__mode is-accent">
+      <h4>MANUEL</h4>
+      <ol>
+        <li><span>Jogging</span></li>
+        <li><span>Confirm save</span></li>
+        <li><span>SAVED overlay</span></li>
+      </ol>
+      <p>Le compteur <code>held_count</code> transforme un maintien RC5 en accélération.</p>
+    </section>
+
+    <section class="satellite-fsm__mode">
+      <h4>SCAN</h4>
+      <ol>
+        <li><span>Idle</span></li>
+        <li><span>Sweeping 360°</span></li>
+        <li><span>No results</span></li>
+        <li><span>Filtered browse</span></li>
+      </ol>
+      <p>Les hits sont stockés dans un bitmap de 32 bits puis réutilisés par AUTO.</p>
+    </section>
+  </div>
+
+  <div class="satellite-fsm__guard">
+    <strong>Verrou de mouvement</strong>
+    <span>
+      Quand <code>flag_is_moving = 1</code>, la navigation est bloquée pour
+      éviter une position SRAM désynchronisée de la position physique.
+    </span>
+  </div>
+</figure>
+
+<style>
+  .satellite-fsm {
+    padding: 1.25rem;
+  }
+
+  .satellite-fsm__header h3 {
+    margin: 0.45rem 0 0;
+    font-size: clamp(1.45rem, 2.4vw, 2rem);
+    line-height: 1.15;
+    color: rgb(var(--color-ink));
+  }
+
+  .satellite-fsm__header p:last-child {
+    margin: 0.8rem 0 0;
+    max-width: 58rem;
+    line-height: 1.65;
+    color: rgb(var(--color-ink-soft));
+  }
+
+  .satellite-fsm__layers {
+    display: grid;
+    gap: 0.9rem;
+    margin-top: 1.25rem;
+    align-items: stretch;
+  }
+
+  .satellite-fsm__layers article,
+  .satellite-fsm__mode,
+  .satellite-fsm__guard {
+    border: 1px solid rgb(var(--color-line-strong));
+    background: rgb(var(--color-paper));
+  }
+
+  .satellite-fsm__layers article {
+    padding: 1rem;
+  }
+
+  .satellite-fsm__layers article span {
+    display: block;
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgb(var(--color-ink-faint));
+  }
+
+  .satellite-fsm__layers article strong {
+    display: block;
+    margin-top: 0.35rem;
+    font-size: 1.3rem;
+    color: rgb(var(--color-ink));
+  }
+
+  .satellite-fsm__layers article p {
+    margin: 0.55rem 0 0;
+    line-height: 1.55;
+    color: rgb(var(--color-ink-soft));
+  }
+
+  .satellite-fsm__bridge {
+    display: grid;
+    place-items: center;
+    gap: 0.25rem;
+    min-height: 4.5rem;
+    border: 1px dashed rgb(var(--color-line-strong));
+    background:
+      linear-gradient(135deg, rgba(var(--color-accent), 0.08), transparent 65%),
+      rgb(var(--color-paper-raised));
+    text-align: center;
+  }
+
+  .satellite-fsm__bridge span {
+    font-size: 1.35rem;
+    font-weight: 900;
+    color: rgb(var(--color-accent-deep));
+  }
+
+  .satellite-fsm__bridge small {
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    font-size: 0.66rem;
+    font-weight: 800;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: rgb(var(--color-ink-faint));
+  }
+
+  .satellite-fsm__modes {
+    display: grid;
+    gap: 0.9rem;
+    margin-top: 0.9rem;
+  }
+
+  .satellite-fsm__mode {
+    padding: 1rem;
+  }
+
+  .satellite-fsm__mode.is-accent {
+    background: rgb(var(--color-accent-soft));
+  }
+
+  .satellite-fsm__mode h4 {
+    margin: 0;
+    font-size: 1.12rem;
+    color: rgb(var(--color-ink));
+  }
+
+  .satellite-fsm__mode ol {
+    display: grid;
+    gap: 0.5rem;
+    margin: 0.85rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .satellite-fsm__mode li {
+    position: relative;
+    padding-left: 1.55rem;
+  }
+
+  .satellite-fsm__mode li::before {
+    content: "";
+    position: absolute;
+    left: 0.35rem;
+    top: 0.72rem;
+    bottom: -0.85rem;
+    width: 1px;
+    background: rgb(var(--color-line-strong));
+  }
+
+  .satellite-fsm__mode li:last-child::before {
+    display: none;
+  }
+
+  .satellite-fsm__mode li::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.45rem;
+    width: 0.72rem;
+    height: 0.72rem;
+    border: 1px solid rgb(var(--color-line-strong));
+    background: rgb(var(--color-paper-raised));
+  }
+
+  .satellite-fsm__mode li span {
+    display: block;
+    border: 1px solid rgb(var(--color-line));
+    background: rgb(var(--color-paper-raised));
+    padding: 0.48rem 0.6rem;
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgb(var(--color-ink));
+  }
+
+  .satellite-fsm__mode p {
+    margin: 0.85rem 0 0;
+    line-height: 1.6;
+    color: rgb(var(--color-ink-soft));
+  }
+
+  .satellite-fsm__guard {
+    display: grid;
+    gap: 0.35rem;
+    margin-top: 0.9rem;
+    padding: 1rem;
+    background: rgb(var(--color-paper-raised));
+  }
+
+  .satellite-fsm__guard strong {
+    font-size: 1.05rem;
+    color: rgb(var(--color-ink));
+  }
+
+  .satellite-fsm__guard span {
+    line-height: 1.6;
+    color: rgb(var(--color-ink-soft));
+  }
+
+  @media (min-width: 860px) {
+    .satellite-fsm__layers {
+      grid-template-columns: minmax(0, 1fr) minmax(7rem, 8rem) minmax(0, 1fr);
+    }
+
+    .satellite-fsm__modes {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+</style>

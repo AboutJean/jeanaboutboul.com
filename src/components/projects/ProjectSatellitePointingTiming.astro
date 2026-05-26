@@ -1,0 +1,132 @@
+<figure class="not-prose satellite-timing surface-card" aria-labelledby="satellite-timing-title">
+  <figcaption>
+    <p class="kicker">Signal PWM</p>
+    <h3 id="satellite-timing-title">Un créneau de 20 ms pour commander l'élévation</h3>
+    <p>
+      Timer1 produit le signal en matériel. Le firmware ne fait que modifier
+      <code>OCR1A</code>, donc la période reste stable et sans jitter logiciel.
+    </p>
+  </figcaption>
+
+  <div class="satellite-timing__wave" aria-label="PWM timing diagram">
+    <div class="satellite-timing__period">20 ms · 50 Hz</div>
+    <svg viewBox="0 0 900 190" role="img" aria-labelledby="pwm-wave-title">
+      <title id="pwm-wave-title">PWM servo : impulsions de 1.0 ms à 1.8 ms dans une période de 20 ms</title>
+      <line x1="48" y1="128" x2="852" y2="128" class="baseline" />
+      <polyline points="52,128 52,52 98,52 98,128 852,128" class="wave wave--zero" />
+      <polyline points="52,156 52,92 134,92 134,156 852,156" class="wave wave--ninety" />
+      <line x1="52" y1="36" x2="852" y2="36" class="period-line" />
+      <line x1="52" y1="28" x2="52" y2="44" class="tick" />
+      <line x1="852" y1="28" x2="852" y2="44" class="tick" />
+      <text x="75" y="45" class="label">1.0 ms → 0°</text>
+      <text x="146" y="87" class="label">1.8 ms → 90°</text>
+      <text x="452" y="25" class="label label--center">période complète</text>
+    </svg>
+  </div>
+
+  <div class="satellite-timing__formula">
+    <strong>Conversion firmware</strong>
+    <span><code>OCR1A = 500 + angle × 400 / 90</code></span>
+  </div>
+</figure>
+
+<style>
+  .satellite-timing {
+    padding: 1.25rem;
+  }
+
+  .satellite-timing h3 {
+    margin: 0.45rem 0 0;
+    font-size: clamp(1.45rem, 2.4vw, 2rem);
+    line-height: 1.15;
+    color: rgb(var(--color-ink));
+  }
+
+  .satellite-timing figcaption > p:last-child {
+    margin: 0.8rem 0 0;
+    max-width: 58rem;
+    line-height: 1.65;
+    color: rgb(var(--color-ink-soft));
+  }
+
+  .satellite-timing__wave {
+    margin-top: 1.15rem;
+    border: 1px solid rgb(var(--color-line-strong));
+    background:
+      linear-gradient(90deg, rgba(var(--color-line), 0.45) 1px, transparent 1px),
+      linear-gradient(0deg, rgba(var(--color-line), 0.35) 1px, transparent 1px),
+      rgb(var(--color-paper));
+    background-size: 44px 44px;
+    padding: 1rem;
+  }
+
+  .satellite-timing__period {
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgb(var(--color-ink-faint));
+  }
+
+  .satellite-timing svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    margin-top: 0.5rem;
+  }
+
+  .satellite-timing .baseline,
+  .satellite-timing .period-line,
+  .satellite-timing .tick {
+    stroke: rgb(var(--color-line-strong));
+    stroke-width: 2;
+  }
+
+  .satellite-timing .wave {
+    fill: none;
+    stroke-linecap: square;
+    stroke-linejoin: miter;
+    stroke-width: 6;
+  }
+
+  .satellite-timing .wave--zero {
+    stroke: rgb(var(--color-accent-deep));
+  }
+
+  .satellite-timing .wave--ninety {
+    stroke: rgb(var(--color-accent));
+  }
+
+  .satellite-timing .label {
+    fill: rgb(var(--color-ink));
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: 0.03em;
+  }
+
+  .satellite-timing .label--center {
+    text-anchor: middle;
+    fill: rgb(var(--color-ink-faint));
+  }
+
+  .satellite-timing__formula {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.7rem;
+    align-items: center;
+    margin-top: 0.9rem;
+    border: 1px solid rgb(var(--color-line));
+    background: rgb(var(--color-paper-raised));
+    padding: 0.85rem;
+  }
+
+  .satellite-timing__formula strong {
+    color: rgb(var(--color-ink));
+  }
+
+  .satellite-timing__formula span {
+    color: rgb(var(--color-ink-soft));
+  }
+</style>

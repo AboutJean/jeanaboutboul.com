@@ -1,0 +1,77 @@
+<figure class="not-prose satellite-overlay-flow surface-card" aria-labelledby="satellite-overlay-flow-title">
+  <figcaption>
+    <p class="kicker">Overlays</p>
+    <h3 id="satellite-overlay-flow-title">Messages temporaires sans bloquer la boucle principale</h3>
+  </figcaption>
+
+  <ol class="satellite-overlay-flow__steps">
+    <li>
+      <span>Handler</span>
+      <p>Appelle <code>overlay_show(500)</code> après une action utilisateur.</p>
+    </li>
+    <li>
+      <span>Timer2 ISR</span>
+      <p>Décrémente <code>overlay_ms_left</code> toutes les millisecondes.</p>
+    </li>
+    <li>
+      <span>Flag dirty</span>
+      <p>Quand le compteur atteint zéro, l'ISR pose <code>overlay_dirty = 1</code>.</p>
+    </li>
+    <li>
+      <span>Main loop</span>
+      <p>Reconstruit <code>lcd_l2_buf</code> et redessine le LCD.</p>
+    </li>
+  </ol>
+</figure>
+
+<style>
+  .satellite-overlay-flow {
+    padding: 1.25rem;
+  }
+
+  .satellite-overlay-flow h3 {
+    margin: 0.45rem 0 0;
+    font-size: clamp(1.45rem, 2.4vw, 2rem);
+    line-height: 1.15;
+    color: rgb(var(--color-ink));
+  }
+
+  .satellite-overlay-flow__steps {
+    display: grid;
+    gap: 0.75rem;
+    margin: 1rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .satellite-overlay-flow__steps li {
+    border: 1px solid rgb(var(--color-line-strong));
+    background: rgb(var(--color-paper));
+    padding: 0.95rem;
+  }
+
+  .satellite-overlay-flow__steps span {
+    display: inline-flex;
+    border: 1px solid rgb(var(--color-line));
+    background: rgb(var(--color-accent-soft));
+    padding: 0.25rem 0.42rem;
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    font-size: 0.66rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgb(var(--color-accent-deep));
+  }
+
+  .satellite-overlay-flow__steps p {
+    margin: 0.55rem 0 0;
+    line-height: 1.6;
+    color: rgb(var(--color-ink-soft));
+  }
+
+  @media (min-width: 900px) {
+    .satellite-overlay-flow__steps {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+</style>

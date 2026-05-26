@@ -1,0 +1,141 @@
+<figure class="not-prose satellite-scan-flow surface-card" aria-labelledby="satellite-scan-flow-title">
+  <figcaption>
+    <p class="kicker">Mode SCAN</p>
+    <h3 id="satellite-scan-flow-title">Du bouton GUIDE au navigateur filtré</h3>
+  </figcaption>
+
+  <div class="satellite-scan-flow__grid" aria-label="SCAN state flow">
+    <article>
+      <span>1</span>
+      <strong>IDLE</strong>
+      <p>Attente avec <code>SCAN: PUSH GUIDE</code>.</p>
+    </article>
+    <article>
+      <span>2</span>
+      <strong>Préparation</strong>
+      <p>Cache EEPROM vers SRAM, puis snapshot de l'élévation actuelle.</p>
+    </article>
+    <article>
+      <span>3</span>
+      <strong>SWEEPING</strong>
+      <p>Rotation 360° et test des 32 slots à chaque degré.</p>
+    </article>
+    <article>
+      <span>4</span>
+      <strong>Bitmap résultats</strong>
+      <p>Chaque satellite détecté positionne un bit dans <code>scan_results</code>.</p>
+    </article>
+    <article class="is-muted">
+      <span>5a</span>
+      <strong>NO_RESULTS</strong>
+      <p>Aucune cible compatible avec la bande d'élévation.</p>
+    </article>
+    <article class="is-accent">
+      <span>5b</span>
+      <strong>RESULTS_BROWSE</strong>
+      <p>Navigation AUTO filtrée sur les satellites détectés.</p>
+    </article>
+  </div>
+</figure>
+
+<style>
+  .satellite-scan-flow {
+    padding: 1.25rem;
+  }
+
+  .satellite-scan-flow h3 {
+    margin: 0.45rem 0 0;
+    font-size: clamp(1.45rem, 2.4vw, 2rem);
+    line-height: 1.15;
+    color: rgb(var(--color-ink));
+  }
+
+  .satellite-scan-flow__grid {
+    display: grid;
+    gap: 0.8rem;
+    margin-top: 1rem;
+  }
+
+  .satellite-scan-flow__grid article {
+    position: relative;
+    border: 1px solid rgb(var(--color-line-strong));
+    background: rgb(var(--color-paper));
+    padding: 1rem;
+  }
+
+  .satellite-scan-flow__grid article::after {
+    content: "";
+    position: absolute;
+    left: 1.3rem;
+    bottom: -0.8rem;
+    width: 1px;
+    height: 0.8rem;
+    background: rgb(var(--color-line-strong));
+  }
+
+  .satellite-scan-flow__grid article:last-child::after,
+  .satellite-scan-flow__grid article:nth-last-child(2)::after {
+    display: none;
+  }
+
+  .satellite-scan-flow__grid article.is-accent {
+    background: rgb(var(--color-accent-soft));
+  }
+
+  .satellite-scan-flow__grid article.is-muted {
+    background: rgb(var(--color-paper-raised));
+  }
+
+  .satellite-scan-flow__grid span {
+    display: inline-grid;
+    min-width: 2rem;
+    height: 2rem;
+    place-items: center;
+    border: 1px solid rgb(var(--color-line));
+    background: rgb(var(--color-paper-raised));
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    font-size: 0.72rem;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    color: rgb(var(--color-accent-deep));
+  }
+
+  .satellite-scan-flow__grid strong {
+    display: block;
+    margin-top: 0.65rem;
+    color: rgb(var(--color-ink));
+  }
+
+  .satellite-scan-flow__grid p {
+    margin: 0.45rem 0 0;
+    line-height: 1.6;
+    color: rgb(var(--color-ink-soft));
+  }
+
+  @media (min-width: 900px) {
+    .satellite-scan-flow__grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .satellite-scan-flow__grid article:nth-child(-n + 4)::after {
+      left: auto;
+      right: -0.8rem;
+      top: 50%;
+      bottom: auto;
+      width: 0.8rem;
+      height: 1px;
+    }
+
+    .satellite-scan-flow__grid article:nth-child(4)::after {
+      display: none;
+    }
+
+    .satellite-scan-flow__grid article:nth-child(5) {
+      grid-column: 3 / 4;
+    }
+
+    .satellite-scan-flow__grid article:nth-child(6) {
+      grid-column: 4 / 5;
+    }
+  }
+</style>
